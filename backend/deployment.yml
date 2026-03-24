@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meu-backend-deployment
+  labels:
+    app: meu-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: meu-backend
+  template:
+    metadata:
+      labels:
+        app: meu-backend
+    spec:
+      containers:
+      - name: meu-backend-container
+        image: sousacomz/sgpd_service:prod
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8080
+        env:
+        - name: Auth__Key
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secrets
+              key: SigningKeyProd
+        - name: ConnectionStrings__PostgreSql
+          valueFrom:
+            secretKeyRef:
+              name: jwt-secrets
+              key: PostgreSqlProdConn 

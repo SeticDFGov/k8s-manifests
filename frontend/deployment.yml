@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: meu-front-deployment
+  labels:
+    app: meu-front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: meu-front
+  template:
+    metadata:
+      labels:
+        app: meu-front
+    spec:
+      containers:
+      - name: meu-front-container
+        image: sousacomz/sgdp-new-front:latest
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 4200
