@@ -15,19 +15,19 @@ spec:
         app: meu-backend
     spec:
       containers:
-      - name: meu-backend-container
-        image: sousacomz/sgpd_service:prod
-        imagePullPolicy: Always
-        ports:
-        - containerPort: 8080
-        env:
-        - name: Auth__Key
-          valueFrom:
-            secretKeyRef:
-              name: jwt-secrets
-              key: SigningKeyProd
-        - name: ConnectionStrings__PostgreSql
-          valueFrom:
-            secretKeyRef:
-              name: jwt-secrets
-              key: PostgreSqlProdConn 
+        - name: meu-backend-container
+          image: sousacomz/sgpd_service:552d69e
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: Auth__Key
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secrets
+                  key: SigningKeyProd
+            - name: ConnectionStrings__PostgreSql
+              valueFrom:
+                secretKeyRef:
+                  name: jwt-secrets
+                  key: PostgreSqlProdConn
