@@ -1,0 +1,43 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: extrator
+  labels:
+    app: extrator
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: extrator
+  template:
+    metadata:
+      labels:
+        app: extrator
+    spec:
+      containers:
+        - name: extrator
+          image: sousacomz/extrator-ses:latest
+          imagePullPolicy: Always
+          args:
+            - agendar
+          envFrom:
+            - configMapRef:
+                name: extrator-config
+            - secretRef:
+                name: extrator-secrets
+          resources:
+            requests:
+              cpu: 1000m
+              memory: 256Mi
+            limits:
+              memory: 512Mi
+          volumeMounts:
+            - name: endpoints
+              mountPath: /app/endpoints.json
+              subPath: endpoints.json
+      volumes:
+        - name: endpoints
+          configMap:
+            name: extrator-endpoints

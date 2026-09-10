@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: olhar-df
+  labels:
+    app: olhar-df
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: olhar-df
+  template:
+    metadata:
+      labels:
+        app: olhar-df
+    spec:
+      containers:
+        - name: olhar-df
+          image: sousacomz/olha-df:732e61ee75121a997042f0236b9f06593c0e0126
+          ports:
+            - name: http
+              containerPort: 8000
+              hostPort: 32678
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi

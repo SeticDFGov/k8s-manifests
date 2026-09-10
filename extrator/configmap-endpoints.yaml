@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: extrator-endpoints
+data:
+  endpoints.json: |
+    {
+      "urgencia_emergencia":      { "path": "/dados_urgencia_emergencia/", "modo": "historico", "habilitado": true, "sonda": false },
+      "consultas_especializadas": { "path": "/dados_consultas_especializadas/", "modo": "historico", "habilitado": true, "sonda": false },
+      "fila_cirurgias_eletivas":  { "path": "/dados_fila_espera_cirurgias_eletivas/", "modo": "historico", "habilitado": true, "sonda": false },
+      "srag":                     { "path": "/dados_srag/", "modo": "historico", "habilitado": true, "sonda": false },
+      "dengue":                   { "path": "/dados_dengue/", "modo": "anual", "habilitado": true, "sonda": false },
+      "ocupacao_enfermaria":      { "path": "/dados_ocupacao_enfermaria/", "modo": "snapshot", "habilitado": true, "sonda": false,
+        "ignorar_no_digesto": ["data_extracao"],
+        "_nota_digesto": "data_extracao e o carimbo de geracao da SES (muda a cada execucao, ate microssegundos). Fora do digesto -> dados_alterados_em so avanca quando a OCUPACAO muda." },
+      "estoque_materiais":        { "path": "/dados_estoque_materiais/", "modo": "snapshot", "habilitado": true, "sonda": false,
+        "ignorar_no_digesto": ["i_data_estoque"],
+        "_nota_digesto": "i_data_estoque e a data do dia (vira sozinha toda meia-noite, mesmo com o estoque parado). Fora do digesto -> o card responde 'as QUANTIDADES mudaram', nao 'a SES republicou'." },
+      "uti_leitos":               { "path": "/dados_uti_leitos/", "modo": "snapshot", "habilitado": true, "sonda": false,
+        "ignorar_no_digesto": ["i_data_extracao", "idade", "dias_internado", "qtd_dias_bloqueado"],
+        "_nota_digesto": "i_data_extracao e carimbado POR LINHA pelo feed novo (varia em ms). idade/dias_internado/qtd_dias_bloqueado sao contadores derivados de HOJE (docs/de_para_uti_urgencia.md:43-46): andam sozinhos na virada do dia. As datas de origem (datanascimento, datainternacao, databloqueio) continuam no digesto e carregam o dado real." },
+      "igesdf_censo_leitos":     { "modo": "iges_api", "path": "/sgdi-censo-leitos",           "habilitado": true },
+      "igesdf_filas_upas_atend": { "modo": "iges_api", "path": "/sgdi-filas-upas", "query": { "dtAtendimento": "@hoje", "limit": "100" }, "habilitado": true },
+      "igesdf_pos_est": { "modo": "iges_api", "path": "/sgdi-posicao-estoque",
+        "query": { "dsEspecie": "MEDICAMENTO", "limit": "100" },
+        "particionar_por": { "campo": "dsClasse", "valores": [
+          "AGENTES DIVERSOS", "ANALGESIA E ANESTESIA", "ANTI-INFECCIOSOS", "ANTINEOPLÁSICOS",
+          "APARELHO CARDIOVASCULAR", "APARELHO DIGESTIVO", "APARELHO GENITO-URINARIO",
+          "APARELHO RESPIRATORIO", "ELETROLITOS E NUTRICAO", "HORMONIOS E ANTI-HORMONIOS",
+          "IMUNOLOGIA E ALERGIA", "NEUROLOGIA", "OLHOS E ANEXOS", "PELE E MUCOSAS",
+          "PSIQUIATRIA", "SANGUE E HEMATOLOGIA", "SOLUÇOES PARENTERAIS DE GRANDE VOLUME" ] },
+        "frequencia": "diaria",
+        "ignorar_no_digesto": ["dias_vencimento"],
+        "_nota": "Grande e sem filtro de data: particionado por dsClasse (17 classes = 100% dos meds) p/ manter o offset BAIXO (a paginacao da API e O(offset): offset 20k=131s). frequencia=diaria -> 1x/dia na SCHEDULE_HORA_DIARIA (precisa haver um SCHEDULE_TIME nessa hora). Atualizar 'valores' se o IGES mudar as classes.",
+        "_nota_digesto": "dias_vencimento e contagem regressiva derivada de HOJE (decrementa sozinha todo dia); dt_validade, que e o dado real, continua no digesto. ultima_movimentacao FICA no digesto: e movimentacao de estoque de verdade.",
+        "habilitado": true },
+      "igesdf_mapa_cirurgico":   { "modo": "iges_api", "path": "/sgdi-mapa-cirurgico", "query": { "dataCirurgia": "@hoje", "limit": "100" }, "habilitado": true },
+      "igesdf_filas_hosp":       { "modo": "iges_api", "path": "/sgdi-filas-hospitais", "query": { "sortBy": "dhPreAtendimento", "sortDir": "desc", "limit": "100" }, "parar_em": { "campo": "dh_pre_atendimento", "min": "@hoje" }, "habilitado": true },
+      "igesdf_consultas_amb":    { "modo": "iges_api", "path": "/sgdi-consultas-ambulatoriais", "query": { "hrAgenda": "@hoje", "limit": "100" }, "habilitado": true },
+
+      "obras_novacap": { "modo": "planilha", "formato": "csv",
+        "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ5m1306vQRNZoD-bNcEPDVzEKhwuNM8IFOgptV5i67xJWq0O-3eH5pQ3eJCXMLnGiZDkwquE4CvE5R/pub?output=csv",
+        "pular_linhas": 1, "secao_coluna": "regiao", "habilitado": true }
+    }

@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: extrator-api-ingress
+  labels:
+    app: extrator-api
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: subgd-api.df.gov.br
+      http:
+        paths:
+          - path: /api/saude
+            pathType: Prefix
+            backend:
+              service:
+                name: extrator-api
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - subgd-api.df.gov.br
+      secretName: subgd-api-tls

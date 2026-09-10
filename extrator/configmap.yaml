@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: extrator-config
+data:
+  DATA_INICIO: "2020-01"
+  IGES_BASE_URL: https://api.igesdf.org.br/sgdi
+  MAX_RETRIES: "5"
+  PG_DATABASE: db_centralrelacionamento
+  PG_HOST: 10.230.81.119
+  PG_PORT: "5432"
+  PG_SCHEMA: public
+  REQUEST_TIMEOUT: "180"
+  RUN_ON_START: "false"
+  SCHEDULE_HORA_DIARIA: "2"
+  SCHEDULE_MODE: incremental
+  SCHEDULE_TIMES: "02:00,04:00,06:00,08:00,10:00,12:00,14:00,16:00,18:00,20:00,22:00,00:00"
+  SES_BASE_URL: https://interno.saude.df.gov.br
+  TZ_OFFSET: "-3"

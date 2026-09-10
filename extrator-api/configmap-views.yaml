@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-views
+data:
+  views.json: |
+    {
+      "dim_ra":                             { "tabela": "vw_dim_ra", "descricao": "Dimensão de Região Administrativa (RA): chave ra_cira, código romano e nome canônico (35 RAs + sentinela -1 NÃO MAPEADO)." },
+
+      "atualizacao_painel":                 { "tabela": "vw_atualizacao_painel", "descricao": "Card 1: hora em que o painel sincronizou com o banco (now() no refresh) + última execução do extrator e último dado novo em qualquer base." },
+      "atualizacao_bases":                  { "tabela": "vw_atualizacao_bases", "descricao": "Card 2, por base/tabela: quando a base recebeu DADOS NOVOS de fato (dados_alterados_em) x quando foi apenas verificada (verificado_em), + status da última execução." },
+      "atualizacao_paginas":                { "tabela": "vw_atualizacao_paginas", "descricao": "Card 2, por página do painel: última atualização real da fonte mais atrasada entre as bases que a página consome." },
+
+      "urgencia_emergencia":                { "tabela": "vw_urgencia_emergencia", "descricao": "Tempo médio de espera (entrada→1º atendimento) por hospital × RA × classificação de risco, dia corrente (SES + IGESDF; coluna rede distingue a fonte)." },
+      "ocupacao_enfermaria":                { "tabela": "vw_ocupacao_enfermaria", "descricao": "Ocupação de enfermaria por estabelecimento (último snapshot do dia)." },
+      "uti_leitos":                         { "tabela": "vw_uti_leitos", "descricao": "Ocupação de leitos de UTI por hospital/tipo (último snapshot do dia)." },
+      "fila_cirurgias_eletivas":            { "tabela": "vw_fila_cirurgias_eletivas", "coluna_data": "i_dt_solicitacao", "descricao": "Fila de cirurgias eletivas (SISREG): dias de espera e flag de crítico (>180 dias)." },
+      "taxa_absenteismo":                   { "tabela": "vw_taxa_absenteismo", "descricao": "Faltas em consultas especializadas no mês corrente (base para taxa de absenteísmo)." },
+
+      "obras_novacap":                      { "tabela": "vw_obras_novacap", "descricao": "Obras da NOVACAP: status, dias em atraso e indicadores físico/financeiro por cidade/RA." },
+
+      "filas_upas_tempos":                  { "tabela": "vw_igesdf_filas_upas_tempos", "descricao": "Tempo de espera nas UPAs IGESDF (maior/menor geral) + pacientes aguardando atendimento." },
+      "filas_upas_tempos_ans":              { "tabela": "vw_igesdf_filas_upas_tempos_ans", "descricao": "Tempo de espera nas UPAs IGESDF por UPA × cor de classificação." },
+      "mapa_cirurgico":                     { "tabela": "vw_igesdf_mapa_cirurgico", "descricao": "Cirurgias do dia por hospital × especialidade × situação (Agendada/Realizada) — IGESDF." },
+      "consultas_amb":                      { "tabela": "vw_igesdf_consultas_amb", "descricao": "Consultas ambulatoriais do dia por especialidade × comparecimento (PRESENTE/FALTA), base de absenteísmo — IGESDF." },
+
+      "essenciais_em_falta":                { "tabela": "vw_essenciais_em_falta", "descricao": "Medicamentos essenciais (REME) em falta por rede/RA/unidade." },
+      "essenciais_falta_por_unidade":       { "tabela": "vw_essenciais_falta_por_unidade", "descricao": "Quantidade de itens essenciais em falta por unidade." },
+      "essenciais_falta_unidades_por_item": { "tabela": "vw_essenciais_falta_unidades_por_item", "descricao": "Quantidade de unidades sem cada item essencial (agrega RAs)." },
+
+      "surtos_dengue":                      { "tabela": "vw_alerta_surtos_dengue", "coluna_ano": "ano_epidemiologico", "descricao": "Notificações de dengue por ano × semana epidemiológica × RA (últimos 5 anos)." },
+      "surtos_srag":                        { "tabela": "vw_alerta_surtos_srag", "coluna_ano": "ano_epidemiologico", "descricao": "Notificações de SRAG por ano × semana epidemiológica × RA (últimos 5 anos)." },
+      "surtos_dengue_forecast":             { "tabela": "vw_alerta_surtos_dengue_forecast", "coluna_ano": "ano_epidemiologico", "descricao": "Previsão (regressão linear) de notificações de dengue por RA: semanas reais + 3 à frente." },
+      "surtos_srag_forecast":               { "tabela": "vw_alerta_surtos_srag_forecast", "coluna_ano": "ano_epidemiologico", "descricao": "Previsão (regressão linear) de notificações de SRAG por RA: semanas reais + 3 à frente." }
+    }

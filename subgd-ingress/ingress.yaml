@@ -1,0 +1,103 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: subgd-ingress
+spec:
+  rules:
+    - host: subgd.df.gov.br
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: meu-front-service
+                port:
+                  number: 80
+    - host: subgd-api.df.gov.br
+      http:
+        paths:
+          - path: /static
+            pathType: Prefix
+            backend:
+              service:
+                name: static-svc
+                port:
+                  number: 80
+          - path: /argocd
+            pathType: Prefix
+            backend:
+              service:
+                name: argocd-server
+                port:
+                  name: http
+          - path: /autenticar
+            pathType: Prefix
+            backend:
+              service:
+                name: fastapi-ldap-svc
+                port:
+                  number: 80
+          - path: /escuta-ativa
+            pathType: Prefix
+            backend:
+              service:
+                name: fastapi-ldap-svc
+                port:
+                  number: 80
+          - path: /jovem-candango
+            pathType: Prefix
+            backend:
+              service:
+                name: fastapi-ldap-svc
+                port:
+                  number: 80
+          - path: /anexo/jovem-candango
+            pathType: Prefix
+            backend:
+              service:
+                name: fastapi-ldap-svc
+                port:
+                  number: 80
+          - path: /atendimentos
+            pathType: Prefix
+            backend:
+              service:
+                name: fastapi-ldap-svc
+                port:
+                  number: 80
+          - path: /api/attachments/
+            pathType: Prefix
+            backend:
+              service:
+                name: fastapi-ldap-svc
+                port:
+                  number: 80
+          - path: /api/download/
+            pathType: Prefix
+            backend:
+              service:
+                name: fastapi-ldap-svc
+                port:
+                  number: 80
+          - path: /keycloak
+            pathType: Prefix
+            backend:
+              service:
+                name: keycloak
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: meu-backend-service
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - subgd.setic.df.gov.br
+      secretName: subgd-tls
+    - hosts:
+        - subgd-api.df.gov.br
+      secretName: subgd-api-tls

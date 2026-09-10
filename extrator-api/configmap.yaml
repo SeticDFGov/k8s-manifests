@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+data:
+  API_BASE_PATH: /api/saude
+  API_POOL_ACQUIRE_TIMEOUT: "15"
+  API_POOL_MAX: "16"
+  API_POOL_MIN: "1"
+  API_VIEWS_FILE: api/views.json
+  API_WORKERS: "1"
+  PG_DATABASE: db_centralrelacionamento
+  PG_HOST: 10.230.81.119
+  PG_PORT: "5432"
+  PG_SCHEMA: public
