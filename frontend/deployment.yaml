@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: meu-front-container
-          image: sousacomz/sgdp-new-front:22918be
+          image: sousacomz/sgdp-new-front:b08969c
           imagePullPolicy: Always
           ports:
             - containerPort: 4200
