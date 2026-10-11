@@ -1,0 +1,23 @@
+# Temporária: adota o Grafana duplicado do namespace default para removê-lo.
+# O finalizer faz o ArgoCD apagar os recursos quando esta Application for removida.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: grafana-default-cleanup
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/SeticDFGov/k8s-manifests.git
+    targetRevision: main
+    path: cleanup/grafana-default
+    directory:
+      exclude: README.md
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      selfHeal: true
