@@ -1,0 +1,20 @@
+# App-of-apps: aplicar UMA vez com admin (kubectl apply -f argocd/root.yaml).
+# Depois disso, toda Application em argocd/apps/ é criada/atualizada pelo próprio ArgoCD.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/SeticDFGov/k8s-manifests.git
+    targetRevision: main
+    path: argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: argocd
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
