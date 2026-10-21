@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msgram-front
+  labels:
+    app: msgram-front
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: msgram-front
+  template:
+    metadata:
+      labels:
+        app: msgram-front
+    spec:
+      containers:
+        - name: front
+          image: sousacomz/msgram-front:latest # TODO: tag fixa após o primeiro build
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            # chamadas SSR do Next vão direto ao Service pela rede do cluster
+            - name: SERVICE_URL
+              value: http://msgram-service:8080/api
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 50m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: msgram-front
+spec:
+  selector:
+    app: msgram-front
+  ports:
+    - port: 3000
+      targetPort: 3000

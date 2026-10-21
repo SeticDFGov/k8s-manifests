@@ -1,0 +1,60 @@
+# Mesmas rotas do deploy/nginx/default.conf upstream: API/admin no Service, resto no Front.
+# TLS no entrypoint websecure com o certificado padrão do Traefik (production.py exige HTTPS).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: msgram
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+    traefik.ingress.kubernetes.io/router.tls: "true"
+spec:
+  ingressClassName: traefik
+  tls:
+    - hosts:
+        - msgram.10.233.159.150.nip.io
+  rules:
+    - host: msgram.10.233.159.150.nip.io
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: msgram-service
+                port:
+                  number: 8080
+          - path: /swagger
+            pathType: Prefix
+            backend:
+              service:
+                name: msgram-service
+                port:
+                  number: 8080
+          - path: /admin
+            pathType: Prefix
+            backend:
+              service:
+                name: msgram-service
+                port:
+                  number: 8080
+          - path: /health
+            pathType: Prefix
+            backend:
+              service:
+                name: msgram-service
+                port:
+                  number: 8080
+          - path: /static
+            pathType: Prefix
+            backend:
+              service:
+                name: msgram-service
+                port:
+                  number: 8080
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: msgram-front
+                port:
+                  number: 3000

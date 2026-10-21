@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: msgram-service
+  labels:
+    app: msgram-service
+spec:
+  # 1 réplica: o start_service.sh roda migrate + load_initial_data no boot
+  replicas: 1
+  selector:
+    matchLabels:
+      app: msgram-service
+  template:
+    metadata:
+      labels:
+        app: msgram-service
+    spec:
+      containers:
+        - name: service
+          image: sousacomz/msgram-service:latest # TODO: tag fixa após o primeiro build
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: msgram-config
+            - secretRef:
+                name: msgram-service
+            - secretRef:
+                name: msgram-postgres
+          startupProbe:
+            httpGet:
+              path: /health/
+              port: 8080
+            periodSeconds: 10
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /health/
+              port: 8080
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: msgram-service
+spec:
+  selector:
+    app: msgram-service
+  ports:
+    - port: 8080
+      targetPort: 8080
