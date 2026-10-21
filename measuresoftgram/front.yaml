@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: front
-          image: sousacomz/msgram-front:latest # TODO: tag fixa após o primeiro build
+          image: sousacomz/msgram-front:latest
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
