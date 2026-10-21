@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: service
-          image: sousacomz/msgram-service:latest # TODO: tag fixa após o primeiro build
+          image: measuresoftgram/service:sha-8797099
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
