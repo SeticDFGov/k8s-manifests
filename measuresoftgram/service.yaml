@@ -32,12 +32,20 @@ spec:
             httpGet:
               path: /health/
               port: 8080
+              # o kubelet manda o IP do pod como Host, que o Django rejeita (ALLOWED_HOSTS)
+              httpHeaders:
+                - name: Host
+                  value: localhost
             periodSeconds: 10
             failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /health/
               port: 8080
+              # o kubelet manda o IP do pod como Host, que o Django rejeita (ALLOWED_HOSTS)
+              httpHeaders:
+                - name: Host
+                  value: localhost
             periodSeconds: 15
           resources:
             requests:
