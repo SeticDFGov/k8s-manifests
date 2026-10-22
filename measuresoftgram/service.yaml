@@ -14,6 +14,9 @@ spec:
     metadata:
       labels:
         app: msgram-service
+      annotations:
+        # envFrom não reinicia o pod quando o ConfigMap muda; altere para forçar o rollout
+        config-rev: "2"
     spec:
       containers:
         - name: service
