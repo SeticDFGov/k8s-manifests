@@ -15,7 +15,9 @@ data:
   CORS_ALLOWED_ORIGINS: https://msgram.10.233.159.150.nip.io
   FRONTEND_PROD_URL: https://msgram.10.233.159.150.nip.io
   LOGIN_REDIRECT_URL: https://msgram.10.233.159.150.nip.io
-  POSTGRES_HOST: msgram-db
+  # Mesmo Postgres do extrator SES, isolado no schema msgram (o schema precisa existir antes do migrate).
+  POSTGRES_HOST: 10.230.81.119
   POSTGRES_PORT: "5432"
-  POSTGRES_DB: msgram
-  POSTGRES_USER: msgram
+  POSTGRES_DB: db_centralrelacionamento
+  # libpq/psycopg2 aplica isso em toda conexão: tabelas do Django vão para o schema msgram, não para o public
+  PGOPTIONS: -c search_path=msgram
