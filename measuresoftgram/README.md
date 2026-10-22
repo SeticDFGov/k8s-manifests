@@ -30,7 +30,7 @@ kubectl -n measuresoftgram create secret generic msgram-postgres \
 
 kubectl -n measuresoftgram create secret generic msgram-service \
   --from-literal=SECRET_KEY="$(openssl rand -base64 48)" \
-  --from-literal=GITHUB_TOKEN_ENCRYPTION_KEYS="$(python3 -c 'from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())')" \
+  --from-literal=GITHUB_TOKEN_ENCRYPTION_KEYS="$(openssl rand -base64 32 | tr '+/' '-_')" \
   --from-literal=GITHUB_CLIENT_ID=<client-id> \
   --from-literal=GITHUB_SECRET=<client-secret>
 ```
