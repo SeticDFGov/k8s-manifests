@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: front
-          image: sousacomz/msgram-front:latest
+          image: sousacomz/msgram-front:ebfb5e9
           imagePullPolicy: Always
           ports:
             - containerPort: 3000
