@@ -9,15 +9,15 @@ O banco é o mesmo Postgres do extrator SES (`10.230.81.119`, base
 
 ## Banco (UMA vez, com o DBA / owner da base)
 
-Usuário próprio, com acesso só ao schema `msgram`, para o MSG não enxergar os
-dados do extrator no `public`:
+Usa o mesmo usuário da base, `ADM_CENTRALRELACIONAMENTO`. Só o schema precisa
+ser criado (o Django não cria schema no migrate):
 
 ```sql
-CREATE ROLE msgram LOGIN PASSWORD '<senha forte>';
-CREATE SCHEMA msgram AUTHORIZATION msgram;
-ALTER ROLE msgram SET search_path = msgram;
-REVOKE ALL ON SCHEMA public FROM msgram;
+CREATE SCHEMA IF NOT EXISTS msgram AUTHORIZATION "ADM_CENTRALRELACIONAMENTO";
 ```
+
+Não usar `ALTER ROLE ... SET search_path`: o role é compartilhado com o extrator.
+O schema do MSG vem só do `PGOPTIONS` no `configmap.yaml`.
 
 ## Secrets (criar UMA vez com admin, fora do Git)
 
@@ -25,8 +25,8 @@ REVOKE ALL ON SCHEMA public FROM msgram;
 kubectl create namespace measuresoftgram
 
 kubectl -n measuresoftgram create secret generic msgram-postgres \
-  --from-literal=POSTGRES_USER=msgram \
-  --from-literal=POSTGRES_PASSWORD='<senha do role msgram>'
+  --from-literal=POSTGRES_USER=ADM_CENTRALRELACIONAMENTO \
+  --from-literal=POSTGRES_PASSWORD='<senha do ADM_CENTRALRELACIONAMENTO>'
 
 kubectl -n measuresoftgram create secret generic msgram-service \
   --from-literal=SECRET_KEY="$(openssl rand -base64 48)" \
