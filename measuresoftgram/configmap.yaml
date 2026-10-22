@@ -6,7 +6,9 @@ data:
   DJANGO_SETTINGS_MODULE: config.settings.production
   DEBUG: "FALSE"
   CREATE_FAKE_DATA: "FALSE"
-  AMBIENT_TEST_OR_DEV: "FALSE"
+  # TEMPORÁRIO: TRUE desliga o APScheduler no boot. Com FALSE ele grava no banco antes do
+  # migrate e o primeiro deploy em banco vazio quebra. Voltar para "FALSE" após o 1º migrate.
+  AMBIENT_TEST_OR_DEV: "TRUE"
   RUN_LOAD_INITIAL_DATA: "true"
   GUNICORN_WORKERS: "3"
   GUNICORN_TIMEOUT: "120"
