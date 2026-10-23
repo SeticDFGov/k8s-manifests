@@ -1,5 +1,6 @@
 # Mesmas rotas do deploy/nginx/default.conf upstream: API/admin no Service, resto no Front.
-# TLS no entrypoint websecure com o certificado padrão do Traefik (production.py exige HTTPS).
+# TLS no entrypoint websecure com certificado da CA interna da SETIC (setic-ca.crt);
+# o Secret msgram-tls é criado fora do Git (ver README). production.py exige HTTPS.
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -12,6 +13,7 @@ spec:
   tls:
     - hosts:
         - msgram.10.233.159.150.nip.io
+      secretName: msgram-tls
   rules:
     - host: msgram.10.233.159.150.nip.io
       http:

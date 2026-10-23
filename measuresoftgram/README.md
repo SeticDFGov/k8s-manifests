@@ -35,6 +35,23 @@ kubectl -n measuresoftgram create secret generic msgram-service \
   --from-literal=GITHUB_SECRET=<client-secret>
 ```
 
+## Certificado TLS
+
+O Ingress usa o Secret `msgram-tls`, assinado pela CA interna `setic-ca.crt`
+(nesta pasta). Quem precisa confiar no MSG (runner self-hosted, navegadores)
+importa só o `setic-ca.crt`. A chave da CA não fica no Git nem no cluster.
+
+```bash
+kubectl -n measuresoftgram create secret tls msgram-tls \
+  --cert=tls-fullchain.crt --key=tls.key
+```
+
+## Integração com os repositórios (MeasureSoftGram-Action)
+
+O MSG está em IP privado, então o job da Action roda no runner self-hosted
+da VM, com `MSGRAM_SERVICE_HOST=https://msgram.10.233.159.150.nip.io` e
+`NODE_EXTRA_CA_CERTS` apontando para o `setic-ca.crt`.
+
 ## Imagens
 
 - Service: imagem oficial `measuresoftgram/service`.
