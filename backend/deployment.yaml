@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: meu-backend-container
-          image: sousacomz/sgpd_service:55e0442
+          image: sousacomz/sgpd_service:d36d769
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
