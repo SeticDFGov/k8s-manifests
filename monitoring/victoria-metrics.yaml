@@ -1,0 +1,185 @@
+# VictoriaMetrics single-node: guarda as métricas e faz a coleta (promscrape), sem vmagent.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: victoria-metrics-data
+  namespace: monitoring
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: victoria-metrics-scrape
+  namespace: monitoring
+data:
+  scrape.yml: |
+    global:
+      scrape_interval: 30s
+      scrape_timeout: 10s
+      external_labels:
+        cluster: ceticsv0002
+    scrape_configs:
+      - job_name: victoria-metrics
+        static_configs:
+          - targets: [localhost:8428]
+
+      # kubelet e cAdvisor (CPU, memória, rede e disco de cada contêiner), pelo proxy do
+      # API server: o certificado do API server é verificado com a CA do cluster
+      - job_name: kubelet
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/$1/proxy/metrics
+      - job_name: cadvisor
+        scheme: https
+        tls_config:
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+        bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        kubernetes_sd_configs:
+          - role: node
+        relabel_configs:
+          - action: labelmap
+            regex: __meta_kubernetes_node_label_(.+)
+          - target_label: __address__
+            replacement: kubernetes.default.svc:443
+          - source_labels: [__meta_kubernetes_node_name]
+            target_label: __metrics_path__
+            replacement: /api/v1/nodes/$1/proxy/metrics/cadvisor
+
+      # Métricas do sistema operacional da VM (CPU, memória, disco, rede)
+      - job_name: node-exporter
+        kubernetes_sd_configs:
+          - role: pod
+            namespaces:
+              names: [monitoring]
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: node-exporter
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_node_name]
+            target_label: instance
+
+      # Estado dos objetos do Kubernetes (réplicas, reinícios, pods pendentes...)
+      - job_name: kube-state-metrics
+        honor_labels: true
+        static_configs:
+          - targets: [kube-state-metrics.monitoring.svc:8080]
+
+      # Qualquer pod com as anotações prometheus.io/* (o Traefik já tem)
+      - job_name: pods-anotados
+        kubernetes_sd_configs:
+          - role: pod
+        relabel_configs:
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+            regex: "true"
+            action: keep
+          - source_labels: [__meta_kubernetes_pod_label_app]
+            regex: node-exporter
+            action: drop
+          - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+            regex: (.+)
+            target_label: __metrics_path__
+          - source_labels: [__address__, __meta_kubernetes_pod_annotation_prometheus_io_port]
+            regex: ([^:]+)(?::\d+)?;(\d+)
+            replacement: $1:$2
+            target_label: __address__
+          - source_labels: [__meta_kubernetes_namespace]
+            target_label: namespace
+          - source_labels: [__meta_kubernetes_pod_name]
+            target_label: pod
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: victoria-metrics
+  namespace: monitoring
+  labels:
+    app: victoria-metrics
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate   # o volume é ReadWriteOnce
+  selector:
+    matchLabels:
+      app: victoria-metrics
+  template:
+    metadata:
+      labels:
+        app: victoria-metrics
+    spec:
+      serviceAccountName: victoria-metrics
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: victoria-metrics
+          image: victoriametrics/victoria-metrics:v1.155.0
+          args:
+            - -storageDataPath=/storage
+            - -retentionPeriod=30d
+            - -promscrape.config=/config/scrape.yml
+            - -promscrape.config.strictParse=true
+            - -promscrape.configCheckInterval=30s
+            - -memory.allowedPercent=60
+          ports:
+            - name: http
+              containerPort: 8428
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: "1"
+              memory: 1Gi
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8428
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8428
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          volumeMounts:
+            - name: data
+              mountPath: /storage
+            - name: config
+              mountPath: /config
+              readOnly: true
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: victoria-metrics-data
+        - name: config
+          configMap:
+            name: victoria-metrics-scrape
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: victoria-metrics
+  namespace: monitoring
+spec:
+  selector:
+    app: victoria-metrics
+  ports:
+    - name: http
+      port: 8428
+      targetPort: http

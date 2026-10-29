@@ -16,6 +16,9 @@ spec:
     automated:
       prune: true
       selfHeal: true
+    syncOptions:
+      # ConfigMaps grandes (dashboards) passam do limite da anotação do apply comum
+      - ServerSideApply=true
     retry:
       limit: 5
       backoff:

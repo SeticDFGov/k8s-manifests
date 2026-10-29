@@ -1,0 +1,39 @@
+# Datasource e dashboards do monitoramento (VictoriaMetrics), carregados pelo próprio Grafana
+# na subida e relidos a cada minuto. Os dashboards vêm de grafana.com (ids no README).
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-datasources
+  namespace: grafana
+data:
+  victoriametrics.yaml: |
+    apiVersion: 1
+    datasources:
+      - name: VictoriaMetrics
+        uid: victoriametrics
+        type: prometheus
+        access: proxy
+        url: http://victoria-metrics.monitoring.svc.cluster.local:8428
+        isDefault: true
+        editable: false
+        jsonData:
+          timeInterval: 30s
+          prometheusType: Prometheus
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-dashboard-provider
+  namespace: grafana
+data:
+  monitoramento.yaml: |
+    apiVersion: 1
+    providers:
+      - name: monitoramento
+        folder: Monitoramento
+        type: file
+        disableDeletion: true
+        allowUiUpdates: false
+        updateIntervalSeconds: 60
+        options:
+          path: /etc/grafana/dashboards

@@ -55,7 +55,37 @@ spec:
           volumeMounts:
             - name: grafana-pv
               mountPath: /var/lib/grafana
+            - name: datasources
+              mountPath: /etc/grafana/provisioning/datasources
+              readOnly: true
+            - name: dashboard-provider
+              mountPath: /etc/grafana/provisioning/dashboards
+              readOnly: true
+            - name: dash-node
+              mountPath: /etc/grafana/dashboards/node
+              readOnly: true
+            - name: dash-kubernetes
+              mountPath: /etc/grafana/dashboards/kubernetes
+              readOnly: true
+            - name: dash-victoriametrics
+              mountPath: /etc/grafana/dashboards/victoriametrics
+              readOnly: true
       volumes:
         - name: grafana-pv
           persistentVolumeClaim:
             claimName: grafana-pvc
+        - name: datasources
+          configMap:
+            name: grafana-datasources
+        - name: dashboard-provider
+          configMap:
+            name: grafana-dashboard-provider
+        - name: dash-node
+          configMap:
+            name: grafana-dashboard-node-exporter-full
+        - name: dash-kubernetes
+          configMap:
+            name: grafana-dashboard-kubernetes
+        - name: dash-victoriametrics
+          configMap:
+            name: grafana-dashboard-victoriametrics
