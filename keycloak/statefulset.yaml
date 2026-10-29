@@ -28,19 +28,21 @@ spec:
             - name: jgroups-fd
               containerPort: 57800
           env:
-            # Redacted for git: originally hardcoded plaintext admin/admin.
-            # Requires a "keycloak-admin" Secret with keys ADMIN_USERNAME / ADMIN_PASSWORD
-            # to be created out-of-band (not managed in this repo), same pattern as db-credentials.
+            # Admin inicial: só é usado na primeira subida, quando o realm master ainda não tem
+            # admin (o de produção já existe no banco). Vem do Secret "keycloak-admin", criado fora
+            # do repositório (é público); opcional, para o pod subir mesmo sem ele.
             - name: KC_BOOTSTRAP_ADMIN_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: keycloak-admin
                   key: ADMIN_USERNAME
+                  optional: true
             - name: KC_BOOTSTRAP_ADMIN_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: keycloak-admin
                   key: ADMIN_PASSWORD
+                  optional: true
             - name: KC_PROXY_HEADERS
               value: xforwarded
             - name: KC_HTTP_ENABLED
@@ -76,10 +78,10 @@ spec:
                   key: DB_PASSWORD
           resources:
             requests:
-              cpu: 500m
-              memory: 1700Mi
+              cpu: 250m
+              memory: 600Mi    # uso real ~600Mi com 1 réplica; o limite segura os picos
             limits:
-              cpu: 2000m
+              cpu: "2"
               memory: 2000Mi
           livenessProbe:
             httpGet:
