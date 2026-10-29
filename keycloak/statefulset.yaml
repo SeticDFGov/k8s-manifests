@@ -6,7 +6,7 @@ metadata:
     app: keycloak
 spec:
   serviceName: keycloak-discovery
-  replicas: 2
+  replicas: 1   # nó único (k3s): a 2ª réplica não protege contra queda da VM e só consome recursos
   selector:
     matchLabels:
       app: keycloak
