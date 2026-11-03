@@ -21,6 +21,12 @@ spec:
           ports:
             - containerPort: 8080
           env:
+            # Keycloak: a API busca as chaves e chama o token endpoint pelo serviço do cluster;
+            # o emissor aceito é o endereço público, o do login OIDC no navegador
+            - name: Auth__Authority
+              value: http://keycloak.default.svc.cluster.local:8080/keycloak/realms/SISTEMA_GEDE
+            - name: Auth__Issuer
+              value: https://subgd-api.df.gov.br/keycloak/realms/SISTEMA_GEDE
             - name: Auth__Key
               valueFrom:
                 secretKeyRef:

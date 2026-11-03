@@ -47,8 +47,21 @@ spec:
               value: xforwarded
             - name: KC_HTTP_ENABLED
               value: "true"
-            - name: KC_HOSTNAME_STRICT
-              value: "false"
+            # Login OIDC no navegador: o Keycloak é servido em /keycloak, atrás do ingress da API
+            # (https://subgd-api.df.gov.br/keycloak), e o emissor (iss) dos tokens é sempre esse
+            # endereço público. O console de administração fica no endereço interno, e a API fala
+            # com o Keycloak pelo serviço do cluster (backchannel dinâmico).
+            - name: KC_HTTP_RELATIVE_PATH
+              value: /keycloak
+            - name: KC_HOSTNAME
+              value: https://subgd-api.df.gov.br/keycloak
+            - name: KC_HOSTNAME_ADMIN
+              value: http://keycloak.10.233.159.150.nip.io/keycloak
+            - name: KC_HOSTNAME_BACKCHANNEL_DYNAMIC
+              value: "true"
+            # As sondas de saúde (porta 9000) continuam em /health
+            - name: KC_HTTP_MANAGEMENT_RELATIVE_PATH
+              value: /
             - name: KC_HEALTH_ENABLED
               value: "true"
             - name: KC_CACHE
