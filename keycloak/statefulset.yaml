@@ -96,6 +96,10 @@ spec:
             limits:
               cpu: "2"
               memory: 2000Mi
+          volumeMounts:
+            - name: tema-sgdp
+              mountPath: /opt/keycloak/themes/sgdp
+              readOnly: true
           livenessProbe:
             httpGet:
               path: /health/live
@@ -112,3 +116,16 @@ spec:
               port: 9000
             periodSeconds: 1
             failureThreshold: 600
+      volumes:
+        - name: tema-sgdp
+          configMap:
+            name: keycloak-tema-sgdp
+            items:
+              - { key: theme.properties, path: login/theme.properties }
+              - { key: template.ftl, path: login/template.ftl }
+              - { key: login.ftl, path: login/login.ftl }
+              - { key: messages_pt_BR.properties, path: login/messages/messages_pt_BR.properties }
+              - { key: sgdp.css, path: login/resources/css/sgdp.css }
+              - { key: sgdp.js, path: login/resources/js/sgdp.js }
+              - { key: marca-gdf.png, path: login/resources/img/marca-gdf.png }
+              - { key: favicon.ico, path: login/resources/img/favicon.ico }

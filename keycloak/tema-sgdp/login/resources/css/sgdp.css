@@ -1,0 +1,267 @@
+/* Tela de login do SGDP no Keycloak: cópia do /auth do front (SGDP-Angular,
+   src/app/auth/login/login.html), com as mesmas cores do Tailwind e do tema escuro gerado do
+   front (src/assets/temas/escuro.css). O tema escuro segue o do sistema operacional. */
+
+:root {
+  --fundo: oklch(96.7% 0.003 264.542);          /* gray-100 */
+  --cartao: #fff;
+  --campo: oklch(98.5% 0.002 247.839);          /* gray-50 */
+  --campo-foco: #fff;
+  --borda: oklch(87.2% 0.01 258.338);           /* gray-300 */
+  --borda-foco: oklch(62.3% 0.214 259.815);     /* blue-500 */
+  --anel-foco: oklch(88.2% 0.059 254.128);      /* blue-200 */
+  --texto: oklch(13% 0.028 261.692);            /* gray-950 */
+  --titulo: oklch(27.8% 0.033 256.848);         /* gray-800 */
+  --icone: oklch(55.1% 0.027 264.364);          /* gray-500 */
+  --icone-hover: oklch(37.3% 0.034 259.733);    /* gray-700 */
+  --apoio: oklch(44.6% 0.03 256.802);           /* gray-600 */
+  --azul: oklch(54.6% 0.245 262.881);           /* blue-600 */
+  --azul-hover: oklch(48.8% 0.243 264.376);     /* blue-700 */
+  --link: oklch(54.6% 0.245 262.881);
+  --erro-fundo: oklch(97.1% 0.013 17.38);       /* red-50 */
+  --erro-borda: oklch(63.7% 0.237 25.331);      /* red-500 */
+  --erro-icone: oklch(70.4% 0.191 22.216);      /* red-400 */
+  --erro-texto: oklch(50.5% 0.213 27.518);      /* red-700 */
+  --ok-fundo: oklch(98.2% 0.018 155.826);
+  --ok-borda: oklch(72.3% 0.219 149.579);
+  --ok-texto: oklch(44.8% 0.119 151.328);
+  --info-fundo: oklch(97% 0.014 254.604);
+  --info-borda: oklch(62.3% 0.214 259.815);
+  --info-texto: oklch(48.8% 0.243 264.376);
+  --foco: #2b7fff;
+  --sombra: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  --sombra-botao: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --sombra-botao-hover: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fundo: oklch(17% 0.012 264);
+    --cartao: oklch(21.5% 0.014 264);
+    --campo: oklch(19.3% 0.013 264);
+    --campo-foco: oklch(21.5% 0.014 264);
+    --borda: oklch(37% 0.018 264);
+    --anel-foco: color-mix(in oklab, oklch(62.3% 0.214 259.815) 45%, oklch(21.5% 0.014 264));
+    --texto: oklch(96.7% 0.003 264.542);
+    --titulo: oklch(96.7% 0.003 264.542);
+    --icone: oklch(70.7% 0.022 261.325);
+    --icone-hover: oklch(87.2% 0.01 258.338);
+    --apoio: oklch(70.7% 0.022 261.325);
+    --link: oklch(70.7% 0.165 254.624);
+    --erro-fundo: color-mix(in oklab, oklch(63.7% 0.237 25.331) 14%, oklch(21.5% 0.014 264));
+    --erro-texto: oklch(80.8% 0.114 19.571);
+    --ok-fundo: color-mix(in oklab, oklch(72.3% 0.219 149.579) 14%, oklch(21.5% 0.014 264));
+    --ok-texto: oklch(87.1% 0.15 154.449);
+    --info-fundo: color-mix(in oklab, oklch(62.3% 0.214 259.815) 14%, oklch(21.5% 0.014 264));
+    --info-texto: oklch(80.9% 0.105 251.813);
+    --foco: oklch(70.7% 0.165 254.624);
+    --sombra: 0 25px 50px -12px rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body { margin: 0; padding: 0; }
+
+body {
+  min-height: 100vh;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  font-size: 1rem;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible { outline: 3px solid var(--foco); outline-offset: 2px; }
+
+.pagina {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.moldura { width: 100%; max-width: 32rem; padding: 1rem; }
+
+.cartao {
+  background: var(--cartao);
+  border-radius: 0.75rem;
+  box-shadow: var(--sombra);
+  overflow: hidden;
+}
+
+.cartao-corpo { padding: 2rem; text-align: center; }
+
+.marca { display: flex; justify-content: center; margin-bottom: 2rem; }
+.marca img { height: 6rem; width: auto; object-fit: contain; }
+
+.titulo {
+  margin: 0 0 1.5rem;
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 700;
+  color: var(--titulo);
+}
+
+.conta-atual {
+  margin: -0.75rem 0 1.5rem;
+  font-size: 0.875rem;
+  color: var(--apoio);
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+a, .link {
+  color: var(--link);
+  text-decoration: underline;
+}
+.link { background: none; border: 0; padding: 0; font: inherit; font-size: 0.875rem; cursor: pointer; }
+
+/* Campos com ícone (login) */
+.campo-icone { position: relative; margin-bottom: 1rem; text-align: left; }
+.campo-senha { margin-bottom: 1.5rem; }
+
+.icone-esquerda {
+  position: absolute;
+  inset: 0 auto 0 0;
+  padding-left: 0.75rem;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+  color: var(--icone);
+}
+.icone-esquerda svg, .botao-olho svg { width: 1.25rem; height: 1.25rem; }
+
+.campo {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--campo);
+  color: var(--texto);
+  border: 1px solid var(--borda);
+  font: inherit;
+  outline: none;
+  transition: all 0.2s;
+}
+.campo-icone .campo { padding-left: 2.5rem; }
+.campo-senha .campo { padding-right: 2.5rem; }
+.campo::placeholder { color: var(--texto); opacity: 1; }
+.campo:focus {
+  border-color: var(--borda-foco);
+  background: var(--campo-foco);
+  box-shadow: 0 0 0 2px var(--anel-foco);
+}
+.campo[aria-invalid="true"] { border-color: var(--erro-borda); }
+
+.botao-olho {
+  position: absolute;
+  inset: 0 0 0 auto;
+  padding: 0 0.75rem;
+  display: flex;
+  align-items: center;
+  background: none;
+  border: 0;
+  color: var(--icone);
+  cursor: pointer;
+  border-radius: 0.5rem;
+}
+.botao-olho:hover { color: var(--icone-hover); }
+.botao-olho .olho-aberto { display: none; }
+.botao-olho[aria-pressed="true"] .olho-aberto { display: block; }
+.botao-olho[aria-pressed="true"] .olho-fechado { display: none; }
+
+.lembrar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: -0.5rem 0 1.5rem;
+  font-size: 0.875rem;
+  color: var(--apoio);
+  text-align: left;
+}
+
+/* Botões */
+.botao {
+  font: inherit;
+  cursor: pointer;
+  border-radius: 0.5rem;
+  border: 0;
+  transition: all 0.2s;
+}
+.botao-primario {
+  background: var(--azul);
+  color: #fff;
+  font-weight: 700;
+  padding: 0.75rem 1rem;
+  box-shadow: var(--sombra-botao);
+}
+.botao-primario:hover { background: var(--azul-hover); box-shadow: var(--sombra-botao-hover); }
+.botao-secundario {
+  background: transparent;
+  color: var(--link);
+  border: 1px solid var(--borda);
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+}
+.botao-bloco { width: 100%; display: flex; justify-content: center; align-items: center; }
+input.botao-bloco { display: block; }
+.botao-entrar { margin-bottom: 1.5rem; }
+.botao-entrar .girando, .botao-entrar .texto-entrando { display: none; }
+.botao-entrar.carregando { opacity: 0.5; cursor: not-allowed; }
+.botao-entrar.carregando .girando { display: block; width: 1.25rem; height: 1.25rem; margin: 0 0.75rem 0 -0.25rem; animation: girar 1s linear infinite; }
+.botao-entrar.carregando .texto-entrar { display: none; }
+.botao-entrar.carregando .texto-entrando { display: inline; }
+@keyframes girar { to { transform: rotate(360deg); } }
+
+/* Avisos (a caixa vermelha do front, e as de sucesso e informação no mesmo desenho) */
+.aviso {
+  display: flex;
+  gap: 0.75rem;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
+  border-left: 4px solid var(--erro-borda);
+  border-radius: 0 0.5rem 0.5rem 0;
+  background: var(--erro-fundo);
+  text-align: left;
+}
+.aviso-icone { flex-shrink: 0; width: 1.25rem; height: 1.25rem; color: var(--erro-icone); }
+.aviso-texto { margin: 0; font-size: 0.875rem; line-height: 1.25rem; color: var(--erro-texto); }
+.aviso-success { background: var(--ok-fundo); border-left-color: var(--ok-borda); }
+.aviso-success .aviso-icone { color: var(--ok-borda); }
+.aviso-success .aviso-texto { color: var(--ok-texto); }
+.aviso-info, .aviso-warning { background: var(--info-fundo); border-left-color: var(--info-borda); }
+.aviso-info .aviso-icone, .aviso-warning .aviso-icone { color: var(--info-borda); }
+.aviso-info .aviso-texto, .aviso-warning .aviso-texto { color: var(--info-texto); }
+
+/* Formulários das outras telas do base (trocar a senha, perfil, erro, sessão expirada) */
+.grupo { margin-bottom: 1rem; text-align: left; }
+.rotulo { display: block; margin-bottom: 0.25rem; font-size: 0.875rem; font-weight: 600; color: var(--titulo); }
+.campo-erro { display: block; margin-top: 0.25rem; font-size: 0.875rem; color: var(--erro-texto); }
+.campo-com-botao { position: relative; }
+.campo-com-botao .campo { padding-right: 2.75rem; }
+.botao-senha {
+  position: absolute;
+  inset: 0 0 0 auto;
+  padding: 0 0.75rem;
+  background: none;
+  border: 0;
+  color: var(--icone);
+  cursor: pointer;
+}
+.botao-senha::after { content: "👁"; font-size: 1rem; }
+.opcoes, .opcoes-links { font-size: 0.875rem; }
+#kc-form-buttons { margin-top: 1.5rem; }
+#kc-form-buttons input + input, #kc-form-buttons button + button { margin-top: 0.75rem; }
+.info { margin-top: 1rem; font-size: 0.875rem; color: var(--apoio); }
+#kc-content-wrapper p, .instrucao { color: var(--apoio); font-size: 0.875rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
