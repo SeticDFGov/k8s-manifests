@@ -3,7 +3,7 @@
 Esboço inicial, para ir completando. O sistema se chamava SGDP; os repositórios e os nomes técnicos (SGDP-Angular, SGDP-Service, tema `sgdp`) ainda usam o nome antigo.
 
  O GitHub desenha os diagramas abaixo (Mermaid); para
-editar, basta mudar o texto. Itens marcados com "?" ainda precisam ser confirmados.
+editar, basta mudar o texto.
 
 ## Visão geral
 
@@ -147,15 +147,3 @@ flowchart LR
   tag --> argo["ArgoCD<br/>(confere a cada 3 min)"]
   argo --> k3s["k3s aplica<br/>(prune + selfHeal)"]
 ```
-
-## A completar
-
-- Rotas inativas no ingress `subgd-ingress`: `/autenticar`, `/escuta-ativa`, `/jovem-candango`,
-  `/atendimentos`, `/api/attachments` e `/api/download` apontam para o `fastapi-ldap-svc`, que existe
-  mas não tem nenhum pod (seletor `app=ldap-api`); `/static` aponta para o `static-svc`, que não
-  existe. Remover do ingress ou subir o serviço de novo.
-- Grafana: `GF_AUTH_LDAP_ENABLED=true`, mas sem `ldap.toml` montado (o login pelo AD não funciona).
-- Se o Keycloak e a API usam o mesmo servidor PostgreSQL (o Keycloak lê do secret `db-credentials`).
-- MCP do GeDê e testes e2e (ainda pelo login antigo, `/api/Auth/token`).
-- Backups (banco, volumes do Grafana e do VictoriaMetrics).
-- Segundo provedor LDAP gravável (OU no domínio raiz, StartTLS 389) para senha temporária.

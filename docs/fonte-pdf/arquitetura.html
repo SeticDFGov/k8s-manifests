@@ -61,14 +61,13 @@
     <li>Componentes e endereços</li>
     <li>Fluxo de login (OIDC)</li>
     <li>Entrega contínua (GitOps)</li>
-    <li>Pontos a confirmar</li>
   </ol>
 </section>
 
 <section class="visao">
   <h2>1. Visão geral</h2>
   <img src="d1.svg" alt="Diagrama da visão geral da arquitetura do GeDê">
-  <p class="legenda">Setas cheias: chamadas e dados. Setas pontilhadas: autenticação, itens planejados ou download de imagens. "?" indica item a confirmar.</p>
+  <p class="legenda">Setas cheias: chamadas e dados. Setas pontilhadas: autenticação, itens planejados ou download de imagens.</p>
 </section>
 
 <section class="pagina">
@@ -104,7 +103,7 @@
   </table>
 </section>
 
-<section class="pagina">
+<section>
   <h2>3. Fluxo de login (OIDC)</h2>
   <p>O front leva a pessoa à tela de login do Keycloak, que confere a senha no Active Directory. O front recebe um código, troca pelo token direto no Keycloak e chama a API com esse token. A API só valida o token; a senha nunca passa por ela.</p>
   <div class="figura"><img src="d2.svg" alt="Diagrama de sequência do login OIDC"></div>
@@ -114,25 +113,6 @@
   <div class="figura"><img src="d3.svg" alt="Diagrama da entrega contínua"></div>
 </section>
 
-<section>
-  <h2>5. Pontos a confirmar</h2>
-  <ul>
-    <li><b>Rotas inativas</b> em <code>subgd-api.df.gov.br</code>: <code>/autenticar</code>, <code>/escuta-ativa</code>, <code>/jovem-candango</code>, <code>/atendimentos</code>, <code>/api/attachments</code> e <code>/api/download</code> apontam para o <code>fastapi-ldap-svc</code>, que não tem nenhum pod; <code>/static</code> aponta para o <code>static-svc</code>, que não existe. Remover do ingress ou restabelecer o serviço.</li>
-    <li><b>Grafana</b>: o login pelo AD está habilitado, mas sem a configuração <code>ldap.toml</code>; na prática não funciona.</li>
-    <li>Se o Keycloak usa o mesmo servidor PostgreSQL das aplicações (credenciais no secret <code>db-credentials</code>).</li>
-    <li>Rotina de backup do PostgreSQL e dos volumes do Grafana e do VictoriaMetrics.</li>
-    <li>Cadeia TLS de <code>subgd-api.df.gov.br</code>: o servidor não envia o certificado intermediário, e alguns clientes recusam a conexão.</li>
-    <li>MCP do GeDê e testes automatizados ainda usam o login antigo pela API; depois de migrados, esse login será desligado.</li>
-  </ul>
-
-  <h3>Mudanças previstas</h3>
-  <ul>
-    <li><b>AD do Palácio do Buriti</b> (<code>buriti.df.gov.br</code>): segundo provedor LDAP no Keycloak, pendente de liberação de rede e de conta de serviço.</li>
-    <li><b>Senha temporária</b>: provedor LDAP gravável restrito a uma OU do domínio raiz <code>gdfnet.df</code>, pela porta 389 com StartTLS, para a troca de senha na tela do Keycloak.</li>
-  </ul>
-
-  <div class="aviso">Documento gerado por <code>docs/fonte-pdf/gerar-pdf.sh</code> a partir de <code>docs/arquitetura.md</code> no repositório <code>k8s-manifests</code>, que é a versão a manter atualizada.</div>
-</section>
 
 </body>
 </html>
