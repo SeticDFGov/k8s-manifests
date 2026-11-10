@@ -6,7 +6,11 @@ editar, basta mudar o texto. Itens marcados com "?" ainda precisam ser confirmad
 ## Visão geral
 
 ```mermaid
-flowchart LR
+---
+config:
+  layout: elk
+---
+flowchart TB
   %% ---------- Pessoas ----------
   usuario(["Servidores do GDF<br/>(navegador)"])
   cidadao(["Cidadão<br/>(páginas públicas)"])
