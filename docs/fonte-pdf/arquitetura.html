@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Arquitetura do GeDê</title>
+<title>Arquitetura do ambiente da VM ceticsv0002</title>
 <style>
   @page { size: A4 portrait; margin: 16mm 14mm 16mm 14mm; }
   @page deitada { size: A4 landscape; margin: 10mm 10mm 12mm 10mm; }
@@ -18,7 +18,7 @@
   .pagina { break-after: page; }
   .deitada { page: deitada; break-before: page; break-after: page; }
   .visao { break-before: page; break-after: page; }
-  .visao img { width: 100%; max-height: 238mm; object-fit: contain; display: block; margin: 0 auto; }
+  .visao img { width: 100%; max-height: 228mm; object-fit: contain; display: block; margin: 0 auto; }
   .figura img { width: 100%; display: block; border: 1px solid #ddd; }
   .legenda { font-size: 8.5pt; color: #444; margin-top: 2mm; }
   table.t { border-collapse: collapse; width: 100%; font-size: 8pt; margin-bottom: 3mm; }
@@ -34,13 +34,13 @@
 <body>
 
 <section class="pagina">
-  <h1>Arquitetura do GeDê</h1>
-  <p class="sub">GeDê (antigo SGDP) e os serviços que rodam no mesmo servidor.<br>Esboço inicial, para ser completado.</p>
+  <h1>Arquitetura do ambiente da VM ceticsv0002</h1>
+  <p class="sub">Aplicações e serviços da SUBGD que rodam na VM ceticsv0002: o GeDê e os demais sistemas do mesmo servidor.</p>
 
   <table class="meta">
     <tr><td>Unidade</td><td>SUBGD / SGDI</td></tr>
     <tr><td>Data</td><td>10/11/2026</td></tr>
-    <tr><td>Versão</td><td>0.1 (esboço)</td></tr>
+    <tr><td>Versão</td><td>1.0</td></tr>
     <tr><td>Fonte</td><td>Repositório <code>SeticDFGov/k8s-manifests</code> (infraestrutura como código) e inspeção do cluster de produção, em modo só leitura</td></tr>
   </table>
 
@@ -48,8 +48,9 @@
   <ul>
     <li><b>Servidor:</b> uma VM (<code>ceticsv0002</code>, 10.233.159.150) com Kubernetes k3s v1.33 de nó único (4 vCPU, cerca de 8 GB de memória). Só é acessível pela rede do GDF ou pela VPN.</li>
     <li><b>Entrada:</b> o ingress Traefik do k3s recebe <code>subgd.df.gov.br</code> (front), <code>subgd-api.df.gov.br</code> (API, Keycloak e ArgoCD) e endereços internos <code>*.10.233.159.150.nip.io</code>.</li>
-    <li><b>Aplicação:</b> front em Angular com SSR e API em .NET. O login é só pelo Keycloak (OIDC, Authorization Code com PKCE); a senha não passa pela API.</li>
-    <li><b>Identidade:</b> Keycloak 26.6.1, realm <code>SISTEMA_GEDE</code>, federado ao Active Directory <code>gdfnet.df</code> por LDAP (somente leitura). Usuários, perfis e acessos são geridos no Keycloak.</li>
+    <li><b>GeDê:</b> front em Angular com SSR e API em .NET, com os módulos Governança Estratégica, Governança de IA (PGIA), Supervisão Contínua das Contratações, Demandas e Projetos e Administração. O login é só pelo Keycloak (OIDC, Authorization Code com PKCE); a senha não passa pela API.</li>
+    <li><b>Outros sistemas:</b> Olhar DF com o extrator de dados da SES-DF e do IGESDF, e MeasureSoftGram.</li>
+    <li><b>Identidade:</b> Keycloak 26.6.1, realm <code>SISTEMA_GEDE</code>, federado ao Active Directory <code>gdfnet.df</code> por LDAP (somente leitura). Usuários, perfis e acessos do GeDê são geridos no Keycloak.</li>
     <li><b>Dados:</b> PostgreSQL fora do cluster (10.230.81.119:5432), com os bancos <code>db_subtdcr</code> (GeDê) e <code>db_centralrelacionamento</code> (extrator, Olhar DF e MeasureSoftGram).</li>
     <li><b>Entrega:</b> GitOps. O GitHub Actions publica a imagem no Docker Hub e grava a versão no <code>k8s-manifests</code>; o ArgoCD aplica no cluster sozinho. Nenhuma mudança é feita direto na VM.</li>
     <li><b>Monitoramento:</b> VictoriaMetrics com node-exporter e kube-state-metrics, visto pelo Grafana.</li>
@@ -59,6 +60,7 @@
   <ol>
     <li>Visão geral (diagrama)</li>
     <li>Componentes e endereços</li>
+    <li>GeDê e o módulo PGIA</li>
     <li>Fluxo de login (OIDC)</li>
     <li>Entrega contínua (GitOps)</li>
   </ol>
@@ -66,7 +68,7 @@
 
 <section class="visao">
   <h2>1. Visão geral</h2>
-  <img src="d1.svg" alt="Diagrama da visão geral da arquitetura do GeDê">
+  <img src="d1.svg" alt="Diagrama da visão geral do ambiente da VM ceticsv0002">
   <p class="legenda">Setas cheias: chamadas e dados. Setas pontilhadas: autenticação, itens planejados ou download de imagens.</p>
 </section>
 
@@ -101,14 +103,20 @@
   </table>
 </section>
 
-<section>
-  <h2>3. Fluxo de login (OIDC)</h2>
-  <p>O front leva a pessoa à tela de login do Keycloak, que confere a senha no Active Directory. O front recebe um código, troca pelo token direto no Keycloak e chama a API com esse token. A API só valida o token; a senha nunca passa por ela.</p>
-  <div class="figura"><img src="d2.svg" alt="Diagrama de sequência do login OIDC"></div>
+<section class="visao">
+  <h2>3. GeDê e o módulo PGIA</h2>
+  <p>O módulo de Governança de IA (PGIA) aplica o Decreto nº 48.901/2026 dentro do GeDê. O acesso vem do Keycloak: a role <code>pgia</code> libera o módulo e o grupo do órgão define a unidade. O papel de cada pessoa (órgão, SGDI, CGTIC ou auditoria) vem do cadastro ou da designação vigente como Responsável de IA, Encarregado de Dados ou Curador de Dados de Negócio. Todos os dados e anexos ficam no banco <code>db_subtdcr</code>; a única parte sem login é a página de transparência, com limite de 30 requisições por minuto por IP.</p>
+  <img src="d2.svg" alt="Diagrama do GeDê com o módulo PGIA: usuários, acesso, telas, rotas da API e tabelas">
+</section>
 
-  <h2 style="margin-top:8mm">4. Entrega contínua (GitOps)</h2>
-  <p>Todo merge na branch principal do front ou da API gera uma imagem e grava a versão dela no repositório <code>k8s-manifests</code>. O ArgoCD confere o repositório a cada 3 minutos e aplica a mudança. Mudanças manuais no cluster são desfeitas pelo ArgoCD (selfHeal).</p>
-  <div class="figura"><img src="d3.svg" alt="Diagrama da entrega contínua"></div>
+<section class="pagina">
+  <h2>4. Fluxo de login (OIDC)</h2>
+  <p>O front leva a pessoa à tela de login do Keycloak, que confere a senha no Active Directory. O front recebe um código, troca pelo token direto no Keycloak e chama a API com esse token. A API só valida o token; a senha nunca passa por ela.</p>
+  <div class="figura"><img src="d3.svg" alt="Diagrama de sequência do login OIDC"></div>
+
+  <h2 style="margin-top:8mm">5. Entrega contínua (GitOps)</h2>
+  <p>Todo merge na branch principal do front ou da API do GeDê gera uma imagem e grava a versão dela no repositório <code>k8s-manifests</code>. O ArgoCD confere o repositório a cada 3 minutos e aplica a mudança. Mudanças manuais no cluster são desfeitas pelo ArgoCD (selfHeal).</p>
+  <div class="figura"><img src="d4.svg" alt="Diagrama da entrega contínua"></div>
 </section>
 
 

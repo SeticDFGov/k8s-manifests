@@ -1,6 +1,8 @@
-# Arquitetura do GeDê (esboço)
+# Arquitetura do ambiente da VM ceticsv0002
 
-Esboço inicial, para ir completando. O sistema se chamava SGDP; os repositórios e os nomes técnicos (SGDP-Angular, SGDP-Service, tema `sgdp`) ainda usam o nome antigo.
+Aplicações e serviços da SUBGD que rodam na VM ceticsv0002 (k3s): o GeDê e os demais
+sistemas do mesmo servidor. O GitHub desenha os diagramas abaixo (Mermaid); para editar,
+basta mudar o texto.
 
  O GitHub desenha os diagramas abaixo (Mermaid); para
 editar, basta mudar o texto.
@@ -108,6 +110,93 @@ flowchart TB
   argocd -->|"lê (sync automático)"| repoK8s
   argocd -->|aplica| ns_default
   vm -. "puxa as imagens" .-> dockerhub
+```
+
+## GeDê e o módulo PGIA
+
+O GeDê é uma das aplicações do ambiente. O módulo de Governança de IA (PGIA, Decreto nº
+48.901/2026) concentra a maior parte das regras e dos dados dele.
+
+```mermaid
+---
+config:
+  layout: elk
+---
+flowchart TB
+  %% ---------- Quem usa ----------
+  subgraph pessoas["Quem usa o PGIA"]
+    agente(["Agente público<br/>(sem papel: registra uso de IA<br/>e avisa incidente, art. 13)"])
+    orgaoP(["Órgão: pgia_orgao<br/>Responsável de IA, Encarregado de Dados,<br/>Curador de Dados de Negócio"])
+    sgdiP(["SGDI: pgia_sgdi<br/>(órgão central)"])
+    cgticP(["Secretaria do CGTIC: pgia_cgtic"])
+    audP(["Auditoria externa: pgia_auditoria"])
+    adminP(["Administrador do GeDê"])
+    cidadao(["Cidadão<br/>(sem login)"])
+  end
+
+  %% ---------- Acesso ----------
+  subgraph acesso["Acesso"]
+    kc["Keycloak · realm SISTEMA_GEDE<br/>role pgia do client-subgd = acesso ao módulo<br/>grupo /ORGAOS/sigla do órgão = unidade"]
+    ad[("AD gdfnet.df")]
+    me["GET /api/Auth/me<br/>módulos liberados + papel PGIA<br/>(papel gravado ou designação vigente)"]
+  end
+
+  %% ---------- Front ----------
+  subgraph front["Front GeDê (subgd.df.gov.br)"]
+    inicio["Tela inicial: cards dos módulos<br/>Governança Estratégica · Governança de IA (PGIA) ·<br/>Supervisão Contínua · Demandas e Projetos · Administração"]
+    trilha["/pgia: trilha numerada por papel<br/>(passos ligados aos artigos do decreto)"]
+    publico["/transparencia-ia (pública)<br/>Registro Público e pedidos de informação"]
+  end
+
+  %% ---------- Áreas do PGIA ----------
+  subgraph areas["Áreas do PGIA"]
+    aOrgao["Órgão<br/>dados e pessoas · designações (titular e suplente) ·<br/>inventário de sistemas de IA e classificação de risco (arts. 15 a 17) ·<br/>incidentes · contratações (art. 25) e legados (art. 37) ·<br/>relatórios semestrais · capacitação · pedidos do cidadão (art. 23) · prazos"]
+    aSgdi["SGDI<br/>dados dos órgãos · pessoas e acessos · homologação ·<br/>plataformas de IA generativa · apuração de incidentes ·<br/>Registro Público · AIA · relatório anual · auditorias ·<br/>não conformidades · normas · autorizações excepcionais"]
+    aCgtic["CGTIC<br/>casos de Alto Risco e Risco Excessivo ·<br/>deliberações · histórico (PDF)"]
+    aAud["Auditoria<br/>auditorias designadas"]
+    aUso["Uso de IA e aviso de incidente<br/>(qualquer pessoa autenticada)"]
+  end
+
+  %% ---------- API ----------
+  subgraph api["API GeDê (subgd-api.df.gov.br) · rotas do PGIA"]
+    rOrgao["api/pgia/orgao"]
+    rSistema["api/pgia/sistema"]
+    rIncidente["api/pgia/incidente"]
+    rConf["api/pgia/conformidade"]
+    rGov["api/pgia/governanca"]
+    rDoc["api/pgia/documento"]
+    rAdmin["api/pgia/admin"]
+    rPub["api/pgia/publico<br/>(anônima, 30 req/min por IP)"]
+  end
+
+  %% ---------- Dados ----------
+  subgraph banco["PostgreSQL 10.230.81.119 · banco db_subtdcr"]
+    tOrg[("Órgãos e pessoas<br/>pgia_orgao · pgia_agente_info ·<br/>pgia_responsavel_ia · pgia_encarregado_dados ·<br/>pgia_curador_dados · Users · Unidades")]
+    tSis[("Sistemas e riscos<br/>pgia_sistema_ia · pgia_classificacao_risco ·<br/>pgia_risco_outro · pgia_aia · pgia_contrato_ia ·<br/>pgia_instrumento_legado")]
+    tGov[("Governança<br/>pgia_deliberacao_cgtic · pgia_plataforma_ia_generativa ·<br/>pgia_autorizacao_excepcional · pgia_norma_complementar ·<br/>pgia_auditoria_tecnica · pgia_nao_conformidade")]
+    tOp[("Operação e transparência<br/>pgia_incidente · pgia_registro_uso_ia · pgia_capacitacao ·<br/>pgia_relatorio_semestral · pgia_relatorio_anual ·<br/>pgia_prazo_conformidade · pgia_solicitacao_cidadao")]
+    tDoc[("Documentos e anexos<br/>pgia_documento · pgia_documento_arquivo (arquivo no banco)")]
+  end
+
+  %% ---------- Ligações ----------
+  agente & orgaoP & sgdiP & cgticP & audP & adminP --> kc
+  kc --> ad
+  kc --> me --> inicio --> trilha
+  cidadao --> publico --> rPub
+  trilha --> aOrgao & aSgdi & aCgtic & aAud & aUso
+  aOrgao --> rOrgao & rSistema & rIncidente & rConf & rDoc
+  aSgdi --> rGov & rAdmin & rDoc
+  aCgtic --> rGov
+  aAud --> rGov
+  aUso --> rConf & rIncidente
+  rOrgao --> tOrg
+  rAdmin --> tOrg
+  rSistema --> tSis
+  rGov --> tGov & tSis
+  rIncidente --> tOp
+  rConf --> tOp
+  rDoc --> tDoc
+  rPub --> tSis & tOp
 ```
 
 ## Login (OIDC)
