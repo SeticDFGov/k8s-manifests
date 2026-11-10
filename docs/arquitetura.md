@@ -49,8 +49,6 @@ flowchart TB
       olhar["Olhar DF"]
       extrator["Extrator SES/IGES<br/>(agendado a cada 2 h)"]
       extratorApi["Extrator API"]
-      fastapi["fastapi-ldap-svc<br/>(sem pods: rotas inativas)"]
-      static["static-svc<br/>(não existe: rota inativa)"]
     end
 
     subgraph ns_msgram["namespace measuresoftgram"]
@@ -75,8 +73,6 @@ flowchart TB
   traefik -->|"subgd.df.gov.br /"| front
   traefik -->|"subgd-api.df.gov.br /"| back
   traefik -->|"subgd-api /keycloak<br/>(/keycloak/admin bloqueado)"| kc
-  traefik -->|"subgd-api /autenticar, /escuta-ativa,<br/>/jovem-candango, /atendimentos..."| fastapi
-  traefik -->|"subgd-api /static"| static
   traefik -->|"subgd-api /argocd"| argocd
   traefik -->|"olhardf.*.nip.io"| olhar
   traefik -->|"msgram.*.nip.io"| msgram

@@ -47,7 +47,7 @@
   <h2 style="margin-top:8mm">Resumo</h2>
   <ul>
     <li><b>Servidor:</b> uma VM (<code>ceticsv0002</code>, 10.233.159.150) com Kubernetes k3s v1.33 de nó único (4 vCPU, cerca de 8 GB de memória). Só é acessível pela rede do GDF ou pela VPN.</li>
-    <li><b>Entrada:</b> o ingress Traefik do k3s recebe <code>subgd.df.gov.br</code> (front), <code>subgd-api.df.gov.br</code> (API, Keycloak e outras rotas) e endereços internos <code>*.10.233.159.150.nip.io</code>.</li>
+    <li><b>Entrada:</b> o ingress Traefik do k3s recebe <code>subgd.df.gov.br</code> (front), <code>subgd-api.df.gov.br</code> (API, Keycloak e ArgoCD) e endereços internos <code>*.10.233.159.150.nip.io</code>.</li>
     <li><b>Aplicação:</b> front em Angular com SSR e API em .NET. O login é só pelo Keycloak (OIDC, Authorization Code com PKCE); a senha não passa pela API.</li>
     <li><b>Identidade:</b> Keycloak 26.6.1, realm <code>SISTEMA_GEDE</code>, federado ao Active Directory <code>gdfnet.df</code> por LDAP (somente leitura). Usuários, perfis e acessos são geridos no Keycloak.</li>
     <li><b>Dados:</b> PostgreSQL fora do cluster (10.230.81.119:5432), com os bancos <code>db_subtdcr</code> (GeDê) e <code>db_centralrelacionamento</code> (extrator, Olhar DF e MeasureSoftGram).</li>
@@ -77,8 +77,6 @@
     <tr><td>Front GeDê</td><td>k3s, <code>default</code> (meu-front-deployment)</td><td><code>https://subgd.df.gov.br</code></td><td>Interface web em Angular 20 com SSR</td></tr>
     <tr><td>API GeDê</td><td>k3s, <code>default</code> (meu-backend-service, 3 réplicas)</td><td><code>https://subgd-api.df.gov.br/</code></td><td>API .NET; valida os tokens do Keycloak</td></tr>
     <tr><td>Keycloak</td><td>k3s, <code>default</code> (StatefulSet, 1 réplica)</td><td><code>https://subgd-api.df.gov.br/keycloak</code> (público; console bloqueado)<br><code>http://keycloak.10.233.159.150.nip.io/keycloak</code> (console, rede interna)</td><td>Login (OIDC), usuários, perfis e grupos; tela de login com o visual do GeDê</td></tr>
-    <tr><td>Rotas /autenticar, /escuta-ativa, /jovem-candango, /atendimentos, /api/attachments, /api/download</td><td>k3s, <code>default</code> (fastapi-ldap-svc)</td><td><code>https://subgd-api.df.gov.br/...</code></td><td>Inativas: o serviço existe, mas não há nenhum pod atrás dele</td></tr>
-    <tr><td>/static</td><td>(static-svc)</td><td><code>https://subgd-api.df.gov.br/static</code></td><td>Inativa: o serviço não existe no cluster</td></tr>
     <tr><td>Extrator SES/IGES</td><td>k3s, <code>default</code></td><td>sem acesso externo</td><td>Busca dados da SES-DF e do IGESDF a cada 2 horas e grava no PostgreSQL</td></tr>
     <tr><td>Extrator API</td><td>k3s, <code>default</code></td><td>interno</td><td>Serve os dados extraídos</td></tr>
     <tr><td>Olhar DF</td><td>k3s, <code>default</code></td><td><code>olhardf.10.233.159.150.nip.io</code></td><td>Painel com os dados do extrator</td></tr>
