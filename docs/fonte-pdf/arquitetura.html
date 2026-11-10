@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
-<title>Arquitetura do SGDP</title>
+<title>Arquitetura do GeDê</title>
 <style>
   @page { size: A4 portrait; margin: 16mm 14mm 16mm 14mm; }
   @page deitada { size: A4 landscape; margin: 10mm 10mm 12mm 10mm; }
@@ -34,8 +34,8 @@
 <body>
 
 <section class="pagina">
-  <h1>Arquitetura do SGDP</h1>
-  <p class="sub">SGDP e os serviços que rodam no mesmo servidor.<br>Esboço inicial, para ser completado.</p>
+  <h1>Arquitetura do GeDê</h1>
+  <p class="sub">GeDê (antigo SGDP) e os serviços que rodam no mesmo servidor.<br>Esboço inicial, para ser completado.</p>
 
   <table class="meta">
     <tr><td>Unidade</td><td>SUBGD / SGDI</td></tr>
@@ -50,7 +50,7 @@
     <li><b>Entrada:</b> o ingress Traefik do k3s recebe <code>subgd.df.gov.br</code> (front), <code>subgd-api.df.gov.br</code> (API, Keycloak e outras rotas) e endereços internos <code>*.10.233.159.150.nip.io</code>.</li>
     <li><b>Aplicação:</b> front em Angular com SSR e API em .NET. O login é só pelo Keycloak (OIDC, Authorization Code com PKCE); a senha não passa pela API.</li>
     <li><b>Identidade:</b> Keycloak 26.6.1, realm <code>SISTEMA_GEDE</code>, federado ao Active Directory <code>gdfnet.df</code> por LDAP (somente leitura). Usuários, perfis e acessos são geridos no Keycloak.</li>
-    <li><b>Dados:</b> PostgreSQL fora do cluster (10.230.81.119:5432), com os bancos <code>db_subtdcr</code> (SGDP) e <code>db_centralrelacionamento</code> (extrator, Olhar DF e MeasureSoftGram).</li>
+    <li><b>Dados:</b> PostgreSQL fora do cluster (10.230.81.119:5432), com os bancos <code>db_subtdcr</code> (GeDê) e <code>db_centralrelacionamento</code> (extrator, Olhar DF e MeasureSoftGram).</li>
     <li><b>Entrega:</b> GitOps. O GitHub Actions publica a imagem no Docker Hub e grava a versão no <code>k8s-manifests</code>; o ArgoCD aplica no cluster sozinho. Nenhuma mudança é feita direto na VM.</li>
     <li><b>Monitoramento:</b> VictoriaMetrics com node-exporter e kube-state-metrics, visto pelo Grafana.</li>
   </ul>
@@ -67,7 +67,7 @@
 
 <section class="visao">
   <h2>1. Visão geral</h2>
-  <img src="d1.svg" alt="Diagrama da visão geral da arquitetura do SGDP">
+  <img src="d1.svg" alt="Diagrama da visão geral da arquitetura do GeDê">
   <p class="legenda">Setas cheias: chamadas e dados. Setas pontilhadas: autenticação, itens planejados ou download de imagens. "?" indica item a confirmar.</p>
 </section>
 
@@ -75,11 +75,11 @@
   <h2>2. Componentes e endereços</h2>
   <table class="t">
     <tr><th>Componente</th><th>Onde roda</th><th>Endereço de acesso</th><th>Função</th></tr>
-    <tr><td>Front SGDP</td><td>k3s, <code>default</code> (meu-front-deployment)</td><td><code>https://subgd.df.gov.br</code></td><td>Interface web em Angular 20 com SSR</td></tr>
-    <tr><td>API SGDP</td><td>k3s, <code>default</code> (meu-backend-service)</td><td><code>https://subgd-api.df.gov.br/</code></td><td>API .NET; valida os tokens do Keycloak</td></tr>
-    <tr><td>Keycloak</td><td>k3s, <code>default</code> (StatefulSet, 1 réplica)</td><td><code>https://subgd-api.df.gov.br/keycloak</code> (público; console bloqueado)<br><code>http://keycloak.10.233.159.150.nip.io/keycloak</code> (console, rede interna)</td><td>Login (OIDC), usuários, perfis e grupos; tela de login com o visual do SGDP</td></tr>
-    <tr><td>Rotas /autenticar, /escuta-ativa, /jovem-candango, /atendimentos, /api/attachments, /api/download</td><td>k3s, <code>default</code> (fastapi-ldap-svc)</td><td><code>https://subgd-api.df.gov.br/...</code></td><td>A confirmar (sem manifesto no repositório)</td></tr>
-    <tr><td>/static</td><td>k3s, <code>default</code> (static-svc)</td><td><code>https://subgd-api.df.gov.br/static</code></td><td>A confirmar (sem manifesto no repositório)</td></tr>
+    <tr><td>Front GeDê</td><td>k3s, <code>default</code> (meu-front-deployment)</td><td><code>https://subgd.df.gov.br</code></td><td>Interface web em Angular 20 com SSR</td></tr>
+    <tr><td>API GeDê</td><td>k3s, <code>default</code> (meu-backend-service, 3 réplicas)</td><td><code>https://subgd-api.df.gov.br/</code></td><td>API .NET; valida os tokens do Keycloak</td></tr>
+    <tr><td>Keycloak</td><td>k3s, <code>default</code> (StatefulSet, 1 réplica)</td><td><code>https://subgd-api.df.gov.br/keycloak</code> (público; console bloqueado)<br><code>http://keycloak.10.233.159.150.nip.io/keycloak</code> (console, rede interna)</td><td>Login (OIDC), usuários, perfis e grupos; tela de login com o visual do GeDê</td></tr>
+    <tr><td>Rotas /autenticar, /escuta-ativa, /jovem-candango, /atendimentos, /api/attachments, /api/download</td><td>k3s, <code>default</code> (fastapi-ldap-svc)</td><td><code>https://subgd-api.df.gov.br/...</code></td><td>Inativas: o serviço existe, mas não há nenhum pod atrás dele</td></tr>
+    <tr><td>/static</td><td>(static-svc)</td><td><code>https://subgd-api.df.gov.br/static</code></td><td>Inativa: o serviço não existe no cluster</td></tr>
     <tr><td>Extrator SES/IGES</td><td>k3s, <code>default</code></td><td>sem acesso externo</td><td>Busca dados da SES-DF e do IGESDF a cada 2 horas e grava no PostgreSQL</td></tr>
     <tr><td>Extrator API</td><td>k3s, <code>default</code></td><td>interno</td><td>Serve os dados extraídos</td></tr>
     <tr><td>Olhar DF</td><td>k3s, <code>default</code></td><td><code>olhardf.10.233.159.150.nip.io</code></td><td>Painel com os dados do extrator</td></tr>
@@ -96,7 +96,7 @@
   <h3>Comunicações de rede usadas hoje</h3>
   <table class="t">
     <tr><th>Origem</th><th>Destino</th><th>Porta</th><th>Uso</th></tr>
-    <tr><td>Internet / rede do GDF</td><td>VM 10.233.159.150</td><td>TCP 443 e 80</td><td>Acesso ao SGDP, à API e ao Keycloak</td></tr>
+    <tr><td>Internet / rede do GDF</td><td>VM 10.233.159.150</td><td>TCP 443 e 80</td><td>Acesso ao GeDê, à API e ao Keycloak</td></tr>
     <tr><td>VM 10.233.159.150</td><td>AD gdfnet.df (10.72.31.103)</td><td>TCP 3268</td><td>Federação LDAP do Keycloak (leitura)</td></tr>
     <tr><td>VM 10.233.159.150</td><td>PostgreSQL 10.230.81.119</td><td>TCP 5432</td><td>Bancos das aplicações</td></tr>
     <tr><td>VM 10.233.159.150</td><td>SES-DF e IGESDF</td><td>TCP 443</td><td>Extrator</td></tr>
@@ -117,11 +117,12 @@
 <section>
   <h2>5. Pontos a confirmar</h2>
   <ul>
-    <li><b>fastapi-ldap-svc</b> e <b>static-svc</b>: estão nas rotas de <code>subgd-api.df.gov.br</code>, mas não têm manifesto no repositório nem são geridos pelo ArgoCD.</li>
+    <li><b>Rotas inativas</b> em <code>subgd-api.df.gov.br</code>: <code>/autenticar</code>, <code>/escuta-ativa</code>, <code>/jovem-candango</code>, <code>/atendimentos</code>, <code>/api/attachments</code> e <code>/api/download</code> apontam para o <code>fastapi-ldap-svc</code>, que não tem nenhum pod; <code>/static</code> aponta para o <code>static-svc</code>, que não existe. Remover do ingress ou restabelecer o serviço.</li>
+    <li><b>Grafana</b>: o login pelo AD está habilitado, mas sem a configuração <code>ldap.toml</code>; na prática não funciona.</li>
     <li>Se o Keycloak usa o mesmo servidor PostgreSQL das aplicações (credenciais no secret <code>db-credentials</code>).</li>
     <li>Rotina de backup do PostgreSQL e dos volumes do Grafana e do VictoriaMetrics.</li>
     <li>Cadeia TLS de <code>subgd-api.df.gov.br</code>: o servidor não envia o certificado intermediário, e alguns clientes recusam a conexão.</li>
-    <li>MCP do SGDP e testes automatizados ainda usam o login antigo pela API; depois de migrados, esse login será desligado.</li>
+    <li>MCP do GeDê e testes automatizados ainda usam o login antigo pela API; depois de migrados, esse login será desligado.</li>
   </ul>
 
   <h3>Mudanças previstas</h3>

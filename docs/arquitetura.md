@@ -1,6 +1,8 @@
-# Arquitetura do SGDP (esboço)
+# Arquitetura do GeDê (esboço)
 
-Esboço inicial, para ir completando. O GitHub desenha os diagramas abaixo (Mermaid); para
+Esboço inicial, para ir completando. O sistema se chamava SGDP; os repositórios e os nomes técnicos (SGDP-Angular, SGDP-Service, tema `sgdp`) ainda usam o nome antigo.
+
+ O GitHub desenha os diagramas abaixo (Mermaid); para
 editar, basta mudar o texto. Itens marcados com "?" ainda precisam ser confirmados.
 
 ## Visão geral
@@ -42,13 +44,13 @@ flowchart TB
 
     subgraph ns_default["namespace default"]
       front["Front Angular (SSR)<br/>meu-front-deployment"]
-      back["API .NET<br/>meu-backend-service"]
+      back["API .NET<br/>meu-backend-service (3 réplicas)"]
       kc["Keycloak 26.6.1<br/>realm SISTEMA_GEDE<br/>/keycloak · tema sgdp"]
       olhar["Olhar DF"]
       extrator["Extrator SES/IGES<br/>(agendado a cada 2 h)"]
       extratorApi["Extrator API"]
-      fastapi["fastapi-ldap-svc ?<br/>(fora do Git)"]
-      static["static-svc ?<br/>(fora do Git)"]
+      fastapi["fastapi-ldap-svc<br/>(sem pods: rotas inativas)"]
+      static["static-svc<br/>(não existe: rota inativa)"]
     end
 
     subgraph ns_msgram["namespace measuresoftgram"]
@@ -148,9 +150,12 @@ flowchart LR
 
 ## A completar
 
-- O que são `fastapi-ldap-svc` e `static-svc`: estão no ingress do `subgd-ingress`, mas não têm
-  manifesto no repositório.
+- Rotas inativas no ingress `subgd-ingress`: `/autenticar`, `/escuta-ativa`, `/jovem-candango`,
+  `/atendimentos`, `/api/attachments` e `/api/download` apontam para o `fastapi-ldap-svc`, que existe
+  mas não tem nenhum pod (seletor `app=ldap-api`); `/static` aponta para o `static-svc`, que não
+  existe. Remover do ingress ou subir o serviço de novo.
+- Grafana: `GF_AUTH_LDAP_ENABLED=true`, mas sem `ldap.toml` montado (o login pelo AD não funciona).
 - Se o Keycloak e a API usam o mesmo servidor PostgreSQL (o Keycloak lê do secret `db-credentials`).
-- MCP do SGDP e testes e2e (ainda pelo login antigo, `/api/Auth/token`).
+- MCP do GeDê e testes e2e (ainda pelo login antigo, `/api/Auth/token`).
 - Backups (banco, volumes do Grafana e do VictoriaMetrics).
 - Segundo provedor LDAP gravável (OU no domínio raiz, StartTLS 389) para senha temporária.
