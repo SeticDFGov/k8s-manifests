@@ -1,0 +1,85 @@
+# API (Node.js + Fastify). Segredos no Secret "adote-api-segredos", criado no
+# cluster fora do Git (este repositório é público). Ver README desta pasta.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adote-api
+  labels: { app: adote-api }
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate: { maxUnavailable: 0, maxSurge: 1 }
+  selector:
+    matchLabels: { app: adote-api }
+  template:
+    metadata:
+      labels: { app: adote-api }
+    spec:
+      imagePullSecrets:
+        - name: ghcr-adote
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: api
+          image: adote-api
+          ports:
+            - { name: http, containerPort: 3000 }
+          envFrom:
+            - configMapRef: { name: adote-api-config }
+            - secretRef: { name: adote-api-segredos }
+          readinessProbe:
+            httpGet: { path: /api/pronto, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /api/saude, port: http }
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 50m, memory: 128Mi }
+            limits: { cpu: 500m, memory: 512Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - { name: tmp, mountPath: /tmp }
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adote-api
+spec:
+  selector: { app: adote-api }
+  ports:
+    - { name: http, port: 80, targetPort: http }
+---
+# Migrações do banco antes de cada sincronização (mesma imagem da API).
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: adote-api-migracoes
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
+spec:
+  backoffLimit: 2
+  template:
+    spec:
+      restartPolicy: Never
+      imagePullSecrets:
+        - name: ghcr-adote
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: migracoes
+          image: adote-api
+          command: ["node", "dist/migrar.js"]
+          envFrom:
+            - configMapRef: { name: adote-api-config }
+            - secretRef: { name: adote-api-segredos }
