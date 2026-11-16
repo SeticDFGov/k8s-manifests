@@ -9,7 +9,7 @@ resources:
 images:
   - name: adote-front
     newName: ghcr.io/seticdfgov/adote-uma-praca-front
-    newTag: sha-bdb71ac
+    newTag: sha-372e3fa
   - name: adote-api
     newName: ghcr.io/seticdfgov/adote-uma-praca-api
     newTag: sha-0000000
