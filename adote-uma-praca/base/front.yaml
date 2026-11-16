@@ -1,0 +1,55 @@
+# Site estático (nginx sem privilégios). O config.ambiente.js vem do ConfigMap
+# gerado em cada overlay; a imagem é a mesma em homologação e produção.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: adote-front
+  labels: { app: adote-front }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: adote-front }
+  template:
+    metadata:
+      labels: { app: adote-front }
+    spec:
+      imagePullSecrets:
+        - name: ghcr-adote
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 101
+        seccompProfile: { type: RuntimeDefault }
+      containers:
+        - name: front
+          image: adote-front
+          ports:
+            - { name: http, containerPort: 8080 }
+          readinessProbe:
+            httpGet: { path: /saude, port: http }
+            periodSeconds: 10
+          livenessProbe:
+            httpGet: { path: /saude, port: http }
+            periodSeconds: 30
+          resources:
+            requests: { cpu: 20m, memory: 32Mi }
+            limits: { cpu: 200m, memory: 128Mi }
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: { drop: [ALL] }
+          volumeMounts:
+            - name: config-ambiente
+              mountPath: /usr/share/nginx/html/js/config.ambiente.js
+              subPath: config.ambiente.js
+      volumes:
+        - name: config-ambiente
+          configMap:
+            name: adote-front-ambiente
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: adote-front
+spec:
+  selector: { app: adote-front }
+  ports:
+    - { name: http, port: 80, targetPort: http }
