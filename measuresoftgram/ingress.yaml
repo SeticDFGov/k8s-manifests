@@ -8,6 +8,8 @@ metadata:
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
     traefik.ingress.kubernetes.io/router.tls: "true"
+    # Liga o MSG sob demanda (ver sablier.yaml)
+    traefik.ingress.kubernetes.io/router.middlewares: measuresoftgram-msgram-sablier@kubernetescrd
 spec:
   ingressClassName: traefik
   tls:
