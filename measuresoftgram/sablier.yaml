@@ -1,0 +1,24 @@
+# Liga o MSG sob demanda (Sablier, ver sablier/ na raiz do repositório): msgram-front e
+# msgram-service formam o grupo "msgram" (label sablierapp.dev/group nos Deployments).
+# Sem acesso por sessionDuration, os dois vão a 0 réplicas; a próxima requisição pelo
+# Ingress mostra a página "iniciando" até os dois ficarem prontos (o service roda
+# migrate no boot, então conta com 1 a 2 minutos).
+#
+# No Kubernetes o plugin só tem a estratégia "dynamic" (página de espera); a "blocking",
+# que seguraria a requisição, não é suportada. Chamadas de API com o MSG desligado
+# recebem essa página: a Action do GitHub precisa acordar o MSG antes (ver README).
+apiVersion: traefik.io/v1alpha1
+kind: Middleware
+metadata:
+  name: msgram-sablier
+spec:
+  plugin:
+    sablier:
+      sablierUrl: http://sablier.sablier.svc.cluster.local:10000
+      group: msgram
+      sessionDuration: 30m
+      dynamic:
+        displayName: MeasureSoftGram
+        showDetails: true
+        theme: hacker-terminal
+        refreshFrequency: 5s

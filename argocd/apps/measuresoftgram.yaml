@@ -12,12 +12,20 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: measuresoftgram
+  # As réplicas do front e do service são do Sablier (0 parado, 1 em uso); sem isto o
+  # selfHeal religaria o MSG a cada desligamento
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      jsonPointers:
+        - /spec/replicas
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - RespectIgnoreDifferences=true
     retry:
       limit: 5
       backoff:

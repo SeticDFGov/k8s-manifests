@@ -4,9 +4,11 @@ metadata:
   name: msgram-service
   labels:
     app: msgram-service
+    # Ligado e desligado pelo Sablier (ver sablier.yaml); por isso sem "replicas" aqui.
+    # Nunca mais de 1 réplica: o start_service.sh roda migrate + load_initial_data no boot
+    sablierapp.dev/enable: "true"
+    sablierapp.dev/group: msgram
 spec:
-  # 1 réplica: o start_service.sh roda migrate + load_initial_data no boot
-  replicas: 1
   selector:
     matchLabels:
       app: msgram-service

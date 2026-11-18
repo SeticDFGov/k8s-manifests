@@ -1,0 +1,85 @@
+# Sablier: desliga (0 réplicas) os Deployments marcados com o label sablierapp.dev/enable
+# depois de um tempo sem acesso e os religa na primeira requisição que passa pelo Traefik
+# (middleware do plugin sablier). Quem usa hoje: measuresoftgram (grupo "msgram").
+#
+# Pré-requisito no Traefik do k3s (fora do ArgoCD): ver k3s-traefik/README.md.
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: sablier
+---
+# Regras do provider Kubernetes (https://sablierapp.dev/providers/kubernetes/):
+# patch em */scale para ligar e desligar; get/list/watch/patch nos workloads.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: sablier
+rules:
+  - apiGroups: ["apps"]
+    resources: ["deployments", "statefulsets"]
+    verbs: ["get", "list", "watch", "patch"]
+  - apiGroups: ["apps"]
+    resources: ["deployments/scale", "statefulsets/scale"]
+    verbs: ["patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: sablier
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: sablier
+subjects:
+  - kind: ServiceAccount
+    name: sablier
+    namespace: sablier
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sablier
+  labels:
+    app: sablier
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sablier
+  template:
+    metadata:
+      labels:
+        app: sablier
+    spec:
+      serviceAccountName: sablier
+      containers:
+        - name: sablier
+          image: sablierapp/sablier:1.21.1
+          args:
+            - start
+            - --provider.name=kubernetes
+          ports:
+            - containerPort: 10000
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 10000
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sablier
+spec:
+  selector:
+    app: sablier
+  ports:
+    - port: 10000
+      targetPort: 10000
