@@ -20,7 +20,7 @@ spec:
         - name: ghcr-seticdfgov
       containers:
         - name: meu-backend-container
-          image: sousacomz/sgpd_service:818c427
+          image: ghcr.io/seticdfgov/gede-api:fcc1b37
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
