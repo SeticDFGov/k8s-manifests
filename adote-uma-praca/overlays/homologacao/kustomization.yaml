@@ -9,10 +9,10 @@ resources:
 images:
   - name: adote-front
     newName: ghcr.io/seticdfgov/adote-uma-praca-front
-    newTag: sha-372e3fa
+    newTag: sha-1f13707
   - name: adote-api
     newName: ghcr.io/seticdfgov/adote-uma-praca-api
-    newTag: sha-0000000
+    newTag: sha-395c686
 
 configMapGenerator:
   - name: adote-front-ambiente
@@ -21,7 +21,7 @@ configMapGenerator:
   - name: adote-api-config
     literals:
       - AMBIENTE=homologacao
-      - URL_PUBLICA=https://adoteumapraca-hml.df.gov.br
+      - URL_PUBLICA=https://hml-adoteumapraca.df.gov.br
       - GOVBR_EMISSOR=https://sso.staging.acesso.gov.br
       # endereço do SEI de homologação/produção: confirmar com a gestão do SEI-GDF
       - SEI_WSDL=https://sei.df.gov.br/sei/controlador_ws.php?servico=sei
@@ -31,4 +31,4 @@ patches:
     patch: |-
       - op: replace
         path: /spec/rules/0/host
-        value: adoteumapraca-hml.df.gov.br
+        value: hml-adoteumapraca.df.gov.br

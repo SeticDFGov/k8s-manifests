@@ -6,13 +6,15 @@ resources:
 
 # As tags são gravadas pelos workflows dos repositórios adote-uma-praca-front e
 # adote-uma-praca-api (homologação: a cada merge no main; produção: a cada release).
+# Até a primeira release vX.Y.Z, produção usa as mesmas imagens de homologação
+# (sha-<commit>); o workflow "Produção" troca pela versão na release.
 images:
   - name: adote-front
     newName: ghcr.io/seticdfgov/adote-uma-praca-front
-    newTag: v0.0.0
+    newTag: sha-1f13707
   - name: adote-api
     newName: ghcr.io/seticdfgov/adote-uma-praca-api
-    newTag: v0.0.0
+    newTag: sha-395c686
 
 configMapGenerator:
   - name: adote-front-ambiente

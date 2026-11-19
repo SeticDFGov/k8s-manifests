@@ -4,6 +4,8 @@ resources:
   - front.yaml
   - api.yaml
   - ingress.yaml
+  - limites.yaml
+  - rede.yaml
 labels:
   - pairs: { app.kubernetes.io/part-of: adote-uma-praca }
     includeSelectors: false

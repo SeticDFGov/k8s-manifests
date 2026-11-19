@@ -1,14 +1,13 @@
 # Site e API no mesmo domínio: "/" para o front e "/api" para a API.
-# O host é definido em cada overlay. TLS é terminado antes do Traefik, como
-# nos demais sistemas da SUBGD.
+# O host é definido em cada overlay. O certificado fica no proxy reverso da infra
+# (10.230.81.124, Let's Encrypt), que repassa ao Traefik da VM, como no subgd.
+# Sem restrição de entrypoint: vale venha o proxy por HTTP (web) ou HTTPS (websecure).
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: adote-uma-praca
-  annotations:
-    kubernetes.io/ingress.class: traefik
-    traefik.ingress.kubernetes.io/router.entrypoints: web
 spec:
+  ingressClassName: traefik
   rules:
     - host: HOST
       http:
