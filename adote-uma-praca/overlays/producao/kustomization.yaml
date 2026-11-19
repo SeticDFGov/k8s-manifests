@@ -23,6 +23,8 @@ configMapGenerator:
   - name: adote-api-config
     literals:
       - AMBIENTE=producao
+      # Schema do ambiente no banco: tabelas em adote_prd, fila em adote_prd_fila
+      - DB_SCHEMA=adote_prd
       - URL_PUBLICA=https://adoteumapraca.df.gov.br
       - GOVBR_EMISSOR=https://sso.acesso.gov.br
       # endereço do SEI de homologação/produção: confirmar com a gestão do SEI-GDF

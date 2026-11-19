@@ -18,6 +18,15 @@ Os dois domínios apontam para o proxy reverso da infra (`10.230.81.124`), que g
 - `limites.yaml`: ResourceQuota (requests 500m e 1 GiB; limits 2 CPU e 2 GiB; 10 pods) e LimitRange com padrões para contêiner sem `resources`. A VM é a mesma do GeDê.
 - `rede.yaml`: só o Traefik (`kube-system`) e os pods do próprio namespace chegam aos pods. Homologação e produção não se enxergam. A saída (banco, gov.br, SEI) é livre.
 
+## Banco
+
+Homologação e produção usam o mesmo banco externo, cada uma com o seu usuário e os seus schemas (`DB_SCHEMA` no ConfigMap de cada overlay; suporte na API desde o PR #4 do `adote-uma-praca-api`):
+
+- Homologação: usuário `adote_hml`, dono dos schemas `adote_hml` (tabelas) e `adote_hml_fila` (fila do pg-boss).
+- Produção: usuário `adote_prd`, dono dos schemas `adote_prd` e `adote_prd_fila`.
+
+Os usuários não precisam (nem devem) poder criar schemas no banco, nem ter acesso ao `public`. O Job de migração cria as tabelas dentro dos schemas.
+
 ## Segredos (criar uma vez por namespace, fora do Git)
 
 Este repositório é público. Nada de segredo aqui. **Crie os namespaces e os Secrets antes do primeiro sync**: sem eles o Job de migração (PreSync) não sobe e a sincronização fica parada.
@@ -32,7 +41,7 @@ kubectl -n adote-hml create secret docker-registry ghcr-seticdfgov \
 
 # Configuração sensível da API
 kubectl -n adote-hml create secret generic adote-api-segredos \
-  --from-literal=DATABASE_URL='postgres://<usuario>:<senha>@<host>:5432/<banco>' \
+  --from-literal=DATABASE_URL='postgres://adote_hml:<senha>@<host>:5432/<banco>' \
   --from-literal=SESSAO_SEGREDO="$(openssl rand -hex 32)" \
   --from-literal=ADMIN_CPF_INICIAL='<CPF do primeiro administrador da SEPE>'
 ```
