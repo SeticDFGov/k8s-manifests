@@ -39,8 +39,8 @@
 
   <table class="meta">
     <tr><td>Unidade</td><td>SUBGD / SGDI</td></tr>
-    <tr><td>Data</td><td>10/11/2026</td></tr>
-    <tr><td>Versão</td><td>1.0</td></tr>
+    <tr><td>Data</td><td>18/11/2026</td></tr>
+    <tr><td>Versão</td><td>1.1</td></tr>
     <tr><td>Fonte</td><td>Repositório <code>SeticDFGov/k8s-manifests</code> (infraestrutura como código) e inspeção do cluster de produção, em modo só leitura</td></tr>
   </table>
 
@@ -52,7 +52,7 @@
     <li><b>Outros sistemas:</b> Olhar DF com o extrator de dados da SES-DF e do IGESDF, e MeasureSoftGram.</li>
     <li><b>Identidade:</b> Keycloak 26.6.1, realm <code>SISTEMA_GEDE</code>, federado ao Active Directory <code>gdfnet.df</code> por LDAP (somente leitura). Usuários, perfis e acessos do GeDê são geridos no Keycloak.</li>
     <li><b>Dados:</b> PostgreSQL fora do cluster (10.230.81.119:5432), com os bancos <code>db_subtdcr</code> (GeDê) e <code>db_centralrelacionamento</code> (extrator, Olhar DF e MeasureSoftGram).</li>
-    <li><b>Entrega:</b> GitOps. O GitHub Actions publica a imagem no Docker Hub e grava a versão no <code>k8s-manifests</code>; o ArgoCD aplica no cluster sozinho. Nenhuma mudança é feita direto na VM.</li>
+    <li><b>Entrega:</b> GitOps. O GitHub Actions publica a imagem do GeDê no GitHub Container Registry da organização (privado) e grava a versão no <code>k8s-manifests</code>; o ArgoCD aplica no cluster sozinho. Nenhuma mudança é feita direto na VM.</li>
     <li><b>Monitoramento:</b> VictoriaMetrics com node-exporter e kube-state-metrics, visto pelo Grafana.</li>
   </ul>
 
@@ -89,7 +89,8 @@
     <tr><td>Active Directory</td><td>rede do GDF</td><td><code>gdfnet.df</code>, porta 3268 (Catálogo Global)</td><td>Origem das contas e senhas (federado no Keycloak, só leitura)</td></tr>
     <tr><td>PostgreSQL</td><td>rede do GDF</td><td><code>10.230.81.119:5432</code></td><td>Bancos <code>db_subtdcr</code> e <code>db_centralrelacionamento</code></td></tr>
     <tr><td>GitHub (SeticDFGov)</td><td>nuvem</td><td>SGDP-Angular, SGDP-Service, k8s-manifests</td><td>Código, CI (GitHub Actions) e infraestrutura como código</td></tr>
-    <tr><td>Docker Hub</td><td>nuvem</td><td><code>sousacomz/*</code></td><td>Imagens dos contêineres</td></tr>
+    <tr><td>GitHub Container Registry</td><td>nuvem</td><td><code>ghcr.io/seticdfgov/gede-api</code> e <code>gede-front</code> (privados)</td><td>Imagens do GeDê; o cluster baixa com o Secret <code>ghcr-seticdfgov</code></td></tr>
+    <tr><td>Docker Hub</td><td>nuvem</td><td><code>sousacomz/*</code>, <code>measuresoftgram/*</code></td><td>Imagens do Olhar DF, do extrator e do MeasureSoftGram (migração para o GHCR prevista)</td></tr>
   </table>
 
   <h3>Comunicações de rede usadas hoje</h3>
@@ -99,7 +100,7 @@
     <tr><td>VM 10.233.159.150</td><td>AD gdfnet.df (10.72.31.103)</td><td>TCP 3268</td><td>Federação LDAP do Keycloak (leitura)</td></tr>
     <tr><td>VM 10.233.159.150</td><td>PostgreSQL 10.230.81.119</td><td>TCP 5432</td><td>Bancos das aplicações</td></tr>
     <tr><td>VM 10.233.159.150</td><td>SES-DF e IGESDF</td><td>TCP 443</td><td>Extrator</td></tr>
-    <tr><td>VM 10.233.159.150</td><td>GitHub e Docker Hub</td><td>TCP 443</td><td>ArgoCD e download das imagens</td></tr>
+    <tr><td>VM 10.233.159.150</td><td>GitHub (github.com e ghcr.io) e Docker Hub</td><td>TCP 443</td><td>ArgoCD e download das imagens</td></tr>
   </table>
 </section>
 
@@ -115,7 +116,7 @@
   <div class="figura"><img src="d3.svg" alt="Diagrama de sequência do login OIDC"></div>
 
   <h2 style="margin-top:8mm">5. Entrega contínua (GitOps)</h2>
-  <p>Todo merge na branch principal do front ou da API do GeDê gera uma imagem e grava a versão dela no repositório <code>k8s-manifests</code>. O ArgoCD confere o repositório a cada 3 minutos e aplica a mudança. Mudanças manuais no cluster são desfeitas pelo ArgoCD (selfHeal).</p>
+  <p>Todo merge na branch principal do front ou da API do GeDê gera uma imagem no GitHub Container Registry (<code>ghcr.io/seticdfgov/gede-*</code>, privado) e grava a versão dela no repositório <code>k8s-manifests</code>; o cluster baixa a imagem com o Secret <code>ghcr-seticdfgov</code>, criado à mão no namespace (<code>docs/ghcr.md</code>). O ArgoCD confere o repositório a cada 3 minutos e aplica a mudança. Mudanças manuais no cluster são desfeitas pelo ArgoCD (selfHeal).</p>
   <div class="figura"><img src="d4.svg" alt="Diagrama da entrega contínua"></div>
 </section>
 
