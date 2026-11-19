@@ -20,7 +20,7 @@ spec:
         - name: ghcr-seticdfgov
       containers:
         - name: meu-front-container
-          image: sousacomz/sgdp-new-front:6bb5330
+          image: ghcr.io/seticdfgov/gede-front:11473d7
           imagePullPolicy: Always
           ports:
             - containerPort: 4200
