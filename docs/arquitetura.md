@@ -4,9 +4,6 @@ Aplicações e serviços da SUBGD que rodam na VM ceticsv0002 (k3s): o GeDê e o
 sistemas do mesmo servidor. O GitHub desenha os diagramas abaixo (Mermaid); para editar,
 basta mudar o texto.
 
- O GitHub desenha os diagramas abaixo (Mermaid); para
-editar, basta mudar o texto.
-
 ## Visão geral
 
 ```mermaid
@@ -37,8 +34,9 @@ flowchart TB
     repoBack["SGDP-Service (.NET)"]
     repoK8s["k8s-manifests<br/>(GitOps)"]
     ci["GitHub Actions<br/>build + tag da imagem"]
+    ghcr[("GitHub Container Registry<br/>ghcr.io/seticdfgov<br/>gede-api · gede-front<br/>(privado)")]
   end
-  dockerhub[("Docker Hub<br/>sousacomz/*")]
+  dockerhub[("Docker Hub<br/>sousacomz/*<br/>(Olhar DF, extrator, MeasureSoftGram)")]
 
   %% ---------- VM ----------
   subgraph vm["VM ceticsv0002 · 10.233.159.150 · k3s nó único"]
@@ -105,11 +103,12 @@ flowchart TB
   %% ---------- Entrega (CD) ----------
   repoFront --> ci
   repoBack --> ci
-  ci -->|imagem| dockerhub
+  ci -->|imagem| ghcr
   ci -->|"grava a tag"| repoK8s
   argocd -->|"lê (sync automático)"| repoK8s
   argocd -->|aplica| ns_default
-  vm -. "puxa as imagens" .-> dockerhub
+  vm -. "puxa as imagens do GeDê<br/>(Secret ghcr-seticdfgov)" .-> ghcr
+  vm -. "puxa as imagens<br/>dos demais sistemas" .-> dockerhub
 ```
 
 ## GeDê e o módulo PGIA
@@ -227,7 +226,7 @@ sequenceDiagram
 ```mermaid
 flowchart LR
   dev["merge na main<br/>(front ou back)"] --> ci["GitHub Actions"]
-  ci --> img["imagem no Docker Hub<br/>tag = commit"]
+  ci --> img["imagem no GHCR (privada)<br/>gede-api · gede-front<br/>tag = commit"]
   ci --> tag["commit em k8s-manifests<br/>(frontend/ ou backend/)"]
   tag --> argo["ArgoCD<br/>(confere a cada 3 min)"]
   argo --> k3s["k3s aplica<br/>(prune + selfHeal)"]
