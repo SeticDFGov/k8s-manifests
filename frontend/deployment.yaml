@@ -14,9 +14,13 @@ spec:
       labels:
         app: meu-front
     spec:
+      # Imagens privadas no GHCR (ghcr.io/seticdfgov/*). O Secret é criado à mão no
+      # namespace, fora do Git (ver docs/ghcr.md).
+      imagePullSecrets:
+        - name: ghcr-seticdfgov
       containers:
         - name: meu-front-container
-          image: sousacomz/sgdp-new-front:6bb5330
+          image: ghcr.io/seticdfgov/gede-front:11473d7
           imagePullPolicy: Always
           ports:
             - containerPort: 4200

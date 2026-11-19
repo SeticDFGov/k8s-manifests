@@ -52,6 +52,33 @@ O MSG está em IP privado, então o job da Action roda no runner self-hosted
 da VM, com `MSGRAM_SERVICE_HOST=https://msgram.10.233.159.150.nip.io` e
 `NODE_EXTRA_CA_CERTS` apontando para o `setic-ca.crt`.
 
+## Liga sob demanda (Sablier)
+
+Front e Service ficam com 0 réplicas depois de 30 min sem acesso e voltam na primeira
+requisição pelo Ingress (`sablier.yaml`; servidor em `sablier/` na raiz do repositório).
+Enquanto sobem (1 a 2 min, o Service roda migrate no boot), toda rota, inclusive `/api`,
+responde com a página de espera do Sablier, não com o dado.
+
+Por isso o job da MeasureSoftGram-Action precisa de um passo antes do envio que acorda o
+MSG e espera o `/health/` responder de verdade:
+
+```bash
+MSG=https://msgram.10.233.159.150.nip.io
+for i in $(seq 1 36); do   # até 6 min
+  corpo=$(curl -s --cacert setic-ca.crt "$MSG/health/" -w '\n%{http_code}')
+  codigo=${corpo##*$'\n'}
+  if [ "$codigo" = 200 ] && ! grep -qi sablier <<<"$corpo"; then echo "MSG pronto"; exit 0; fi
+  sleep 10
+done
+echo "MSG não subiu"; exit 1
+```
+
+(Conferir uma vez, com o MSG desligado, que a página de espera contém "sablier"; se não,
+trocar o `grep` por um texto que só a página de espera tenha.)
+
+Ligar à mão, sem esperar requisição: `kubectl -n measuresoftgram scale deploy msgram-front msgram-service --replicas=1`
+(o Sablier desliga de novo depois de 30 min sem acesso).
+
 ## Imagens
 
 - Service: imagem oficial `measuresoftgram/service`.

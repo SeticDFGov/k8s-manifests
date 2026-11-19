@@ -1,0 +1,114 @@
+# O extrator roda como CronJob: o pod só existe durante a extração e some no fim, em vez
+# de um Deployment 24/7 (modo "agendar") que só dormia até o próximo horário.
+#
+# Os horários são os do antigo SCHEDULE_TIMES (a cada 2h, hora de Brasília), em dois
+# CronJobs para manter a regra do modo agendar:
+#   - extrator-diario   02:00, TODOS os endpoints habilitados (inclui os de frequencia
+#                       "diaria", hoje só o igesdf_pos_est, a hora de SCHEDULE_HORA_DIARIA);
+#   - extrator-2h       demais horários, só os de frequencia "sempre" (--only).
+# Endpoint novo em configmap-endpoints.yaml com frequencia "sempre" precisa entrar no
+# --only do extrator-2h; sem isso, ele só roda às 02:00.
+#
+# activeDeadlineSeconds abaixo de 2h: uma execução presa é encerrada antes do próximo
+# horário, e os dois CronJobs nunca rodam ao mesmo tempo.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: extrator-2h
+  labels:
+    app: extrator
+spec:
+  schedule: "0 0,4,6,8,10,12,14,16,18,20,22 * * *"
+  timeZone: America/Sao_Paulo
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 7000
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app: extrator
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: extrator
+              image: sousacomz/extrator-ses:latest
+              imagePullPolicy: Always
+              args:
+                - incremental
+                - --only
+                - urgencia_emergencia,consultas_especializadas,fila_cirurgias_eletivas,srag,dengue,ocupacao_enfermaria,estoque_materiais,uti_leitos,igesdf_censo_leitos,igesdf_filas_upas_atend,igesdf_mapa_cirurgico,igesdf_filas_hosp,igesdf_consultas_amb,obras_novacap
+              envFrom:
+                - configMapRef:
+                    name: extrator-config
+                - secretRef:
+                    name: extrator-secrets
+              resources:
+                requests:
+                  cpu: 1000m
+                  memory: 256Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: endpoints
+                  mountPath: /app/endpoints.json
+                  subPath: endpoints.json
+          volumes:
+            - name: endpoints
+              configMap:
+                name: extrator-endpoints
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: extrator-diario
+  labels:
+    app: extrator
+spec:
+  schedule: "0 2 * * *"
+  timeZone: America/Sao_Paulo
+  concurrencyPolicy: Forbid
+  startingDeadlineSeconds: 600
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      activeDeadlineSeconds: 7000
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app: extrator
+        spec:
+          restartPolicy: Never
+          containers:
+            - name: extrator
+              image: sousacomz/extrator-ses:latest
+              imagePullPolicy: Always
+              args:
+                - incremental
+              envFrom:
+                - configMapRef:
+                    name: extrator-config
+                - secretRef:
+                    name: extrator-secrets
+              resources:
+                requests:
+                  cpu: 1000m
+                  memory: 256Mi
+                limits:
+                  memory: 512Mi
+              volumeMounts:
+                - name: endpoints
+                  mountPath: /app/endpoints.json
+                  subPath: endpoints.json
+          volumes:
+            - name: endpoints
+              configMap:
+                name: extrator-endpoints

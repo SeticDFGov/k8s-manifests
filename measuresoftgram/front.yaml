@@ -4,8 +4,10 @@ metadata:
   name: msgram-front
   labels:
     app: msgram-front
+    # Ligado e desligado pelo Sablier (ver sablier.yaml); por isso sem "replicas" aqui
+    sablierapp.dev/enable: "true"
+    sablierapp.dev/group: msgram
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app: msgram-front

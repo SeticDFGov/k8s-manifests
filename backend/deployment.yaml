@@ -14,9 +14,13 @@ spec:
       labels:
         app: meu-backend
     spec:
+      # Imagens privadas no GHCR (ghcr.io/seticdfgov/*). O Secret é criado à mão no
+      # namespace, fora do Git (ver docs/ghcr.md).
+      imagePullSecrets:
+        - name: ghcr-seticdfgov
       containers:
         - name: meu-backend-container
-          image: sousacomz/sgpd_service:818c427
+          image: ghcr.io/seticdfgov/gede-api:fcc1b37
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

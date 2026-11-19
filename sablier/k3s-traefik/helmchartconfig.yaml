@@ -1,0 +1,22 @@
+# Configuração do Traefik empacotado no k3s para o Sablier. NÃO é aplicada pelo ArgoCD
+# (a Application sablier só lê a raiz de sablier/); ver README.md nesta pasta.
+#
+# Só o plugin: o Traefik baixa o sablier-traefik-plugin de plugins.traefik.io no boot
+# (precisa de saída para a internet a partir do pod do Traefik).
+#
+# allowEmptyServices (Service com 0 pods continua roteado e passa pelo middleware em vez
+# de dar 404) já está ligado nos dois providers: em 2026-11-18 o Traefik 3.3.6 do k3s
+# v1.33.5 roda com --providers.kubernetescrd.allowEmptyServices=true e
+# --providers.kubernetesingress.allowEmptyServices=true, padrão do chart.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+spec:
+  valuesContent: |-
+    experimental:
+      plugins:
+        sablier:
+          moduleName: github.com/sablierapp/sablier-traefik-plugin
+          version: v1.4.0
