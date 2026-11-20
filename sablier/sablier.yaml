@@ -2,7 +2,7 @@
 # depois de um tempo sem acesso e os religa na primeira requisição que passa pelo Traefik
 # (middleware do plugin sablier). Quem usa hoje: measuresoftgram (grupo "msgram").
 #
-# Pré-requisito no Traefik do k3s (fora do ArgoCD): ver k3s-traefik/README.md.
+# Pré-requisito no Traefik do k3s: plugin em k3s-traefik/ (Application traefik-config).
 apiVersion: v1
 kind: ServiceAccount
 metadata:

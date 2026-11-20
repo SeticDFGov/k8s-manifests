@@ -1,0 +1,38 @@
+# Configuração do Traefik empacotado no k3s, aplicada pelo ArgoCD (Application
+# "traefik-config"). Só pode existir UM HelmChartConfig "traefik" em kube-system:
+# não criar outro à mão nem em /var/lib/rancher/k3s/server/manifests/ (ver README.md).
+#
+# Cada mudança aqui reinstala o chart e reinicia o Traefik: alguns segundos fora do ar
+# para todos os sites. Fazer o merge fora do horário de uso.
+#
+# - Plugin do Sablier (MeasureSoftGram sob demanda). O Traefik baixa o plugin de
+#   plugins.traefik.io no boot. allowEmptyServices já vem ligado no chart do k3s.
+# - Log de acesso em JSON: host, entrypoint (web/websecure), origem, status e tempo.
+#   Cabeçalhos descartados, exceto X-Forwarded-For (IP real, enviado pelo proxy da
+#   infra) e User-Agent: Authorization e cookies de sessão não vão para o log.
+apiVersion: helm.cattle.io/v1
+kind: HelmChartConfig
+metadata:
+  name: traefik
+  namespace: kube-system
+  annotations:
+    # Apagar a Application (ou tirar o arquivo) não pode remover a configuração:
+    # o Traefik perderia o plugin do Sablier.
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+spec:
+  valuesContent: |-
+    experimental:
+      plugins:
+        sablier:
+          moduleName: github.com/sablierapp/sablier-traefik-plugin
+          version: v1.4.0
+    logs:
+      access:
+        enabled: true
+        format: json
+        fields:
+          headers:
+            defaultmode: drop
+            names:
+              X-Forwarded-For: keep
+              User-Agent: keep
