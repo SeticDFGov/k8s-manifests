@@ -12,7 +12,7 @@ images:
     newTag: sha-1f13707
   - name: adote-api
     newName: ghcr.io/seticdfgov/adote-uma-praca-api
-    newTag: sha-395c686
+    newTag: sha-66e6986
 
 configMapGenerator:
   - name: adote-front-ambiente
