@@ -29,7 +29,7 @@ Os usuários não precisam (nem devem) poder criar schemas no banco, nem ter ace
 
 ## Segredos (criar uma vez por namespace, fora do Git)
 
-Este repositório é público. Nada de segredo aqui. **Crie os namespaces e os Secrets antes do primeiro sync**: sem eles o Job de migração (PreSync) não sobe e a sincronização fica parada.
+Este repositório é público. Nada de segredo aqui. **Crie os namespaces e os Secrets antes do primeiro sync**: sem eles o Job de migração não sobe e a sincronização fica parada.
 
 ```bash
 for ns in adote-hml adote-prd; do kubectl create namespace $ns; done
@@ -57,4 +57,4 @@ Obrigatórios para a API subir: `DATABASE_URL` e `SESSAO_SEGREDO` (32 caracteres
 | `SMTP_URL` | e-mail desligado |
 | `ADMIN_CPF_INICIAL` | nenhum administrador criado no primeiro boot |
 
-As migrações do banco rodam num Job `PreSync` antes de cada sincronização. A fila e as tarefas agendadas (pg-boss) usam o próprio banco.
+As migrações do banco rodam num Job (hook `Sync`, onda 1) a cada sincronização: depois do ConfigMap (onda 0) e antes da API (onda 2). A fila e as tarefas agendadas (pg-boss) usam o próprio banco.

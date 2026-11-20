@@ -5,6 +5,8 @@ kind: Deployment
 metadata:
   name: adote-api
   labels: { app: adote-api }
+  annotations:
+    argocd.argoproj.io/sync-wave: "2"
 spec:
   replicas: 1
   strategy:
@@ -58,13 +60,17 @@ spec:
   ports:
     - { name: http, port: 80, targetPort: http }
 ---
-# Migrações do banco antes de cada sincronização (mesma imagem da API).
+# Migrações do banco a cada sincronização (mesma imagem da API).
+# Hook "Sync" na onda 1, não PreSync: o Job lê o ConfigMap gerado pelo kustomize
+# (nome com hash), que só existe depois de aplicado na onda 0 da fase Sync.
+# A API fica na onda 2: os pods novos só sobem depois da migração concluída.
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: adote-api-migracoes
   annotations:
-    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook: Sync
+    argocd.argoproj.io/sync-wave: "1"
     argocd.argoproj.io/hook-delete-policy: BeforeHookCreation
 spec:
   backoffLimit: 2
