@@ -22,8 +22,8 @@ Os dois domínios apontam para o proxy reverso da infra (`10.230.81.124`), que g
 
 Homologação e produção usam o mesmo banco externo, cada uma com o seu usuário e os seus schemas (`DB_SCHEMA` no ConfigMap de cada overlay; suporte na API desde o PR #4 do `adote-uma-praca-api`):
 
-- Homologação: usuário `adote_hml`, dono dos schemas `adote_hml` (tabelas) e `adote_hml_fila` (fila do pg-boss).
-- Produção: usuário `adote_prd`, dono dos schemas `adote_prd` e `adote_prd_fila`.
+- Homologação: usuário `usr_adote_hml`, dono dos schemas `adote_hml` (tabelas) e `adote_hml_fila` (fila do pg-boss).
+- Produção: usuário `usr_adote_prd`, dono dos schemas `adote_prd` e `adote_prd_fila`.
 
 Os usuários não precisam (nem devem) poder criar schemas no banco, nem ter acesso ao `public`. O Job de migração cria as tabelas dentro dos schemas.
 
@@ -41,7 +41,7 @@ kubectl -n adote-hml create secret docker-registry ghcr-seticdfgov \
 
 # Configuração sensível da API
 kubectl -n adote-hml create secret generic adote-api-segredos \
-  --from-literal=DATABASE_URL='postgres://adote_hml:<senha>@<host>:5432/<banco>' \
+  --from-literal=DATABASE_URL='postgres://usr_adote_hml:<senha>@<host>:5432/<banco>' \
   --from-literal=SESSAO_SEGREDO="$(openssl rand -hex 32)" \
   --from-literal=ADMIN_CPF_INICIAL='<CPF do primeiro administrador da SEPE>'
 ```
