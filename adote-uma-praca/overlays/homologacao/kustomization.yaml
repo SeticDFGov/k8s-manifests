@@ -1,0 +1,36 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: adote-hml
+resources:
+  - ../../base
+
+# As tags são gravadas pelos workflows dos repositórios adote-uma-praca-front e
+# adote-uma-praca-api (homologação: a cada merge no main; produção: a cada release).
+images:
+  - name: adote-front
+    newName: ghcr.io/seticdfgov/adote-uma-praca-front
+    newTag: sha-1f13707
+  - name: adote-api
+    newName: ghcr.io/seticdfgov/adote-uma-praca-api
+    newTag: sha-395c686
+
+configMapGenerator:
+  - name: adote-front-ambiente
+    files:
+      - config.ambiente.js
+  - name: adote-api-config
+    literals:
+      - AMBIENTE=homologacao
+      # Schema do ambiente no banco: tabelas em adote_hml, fila em adote_hml_fila
+      - DB_SCHEMA=adote_hml
+      - URL_PUBLICA=https://hml-adoteumapraca.df.gov.br
+      - GOVBR_EMISSOR=https://sso.staging.acesso.gov.br
+      # endereço do SEI de homologação/produção: confirmar com a gestão do SEI-GDF
+      - SEI_WSDL=https://sei.df.gov.br/sei/controlador_ws.php?servico=sei
+
+patches:
+  - target: { kind: Ingress, name: adote-uma-praca }
+    patch: |-
+      - op: replace
+        path: /spec/rules/0/host
+        value: hml-adoteumapraca.df.gov.br

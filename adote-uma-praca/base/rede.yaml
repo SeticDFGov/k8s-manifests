@@ -1,0 +1,16 @@
+# Só o Traefik (namespace kube-system) e os pods do próprio namespace falam com os
+# pods do Adote. Homologação e produção ficam isoladas entre si e do GeDê.
+# A saída (banco externo, gov.br, SEI) não é restringida.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: adote-uma-praca-entrada
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector: {}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system

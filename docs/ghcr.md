@@ -8,8 +8,12 @@ repositório publica com o `GITHUB_TOKEN` do próprio workflow; o cluster baixa 
 |---|---|---|
 | `ghcr.io/seticdfgov/gede-api` | SGDP-Service | `backend/deployment.yaml` |
 | `ghcr.io/seticdfgov/gede-front` | SGDP-Angular | `frontend/deployment.yaml` |
+| `ghcr.io/seticdfgov/adote-uma-praca-api` | adote-uma-praca-api | `adote-uma-praca/` (namespaces `adote-hml` e `adote-prd`) |
+| `ghcr.io/seticdfgov/adote-uma-praca-front` | adote-uma-praca-front | `adote-uma-praca/` (namespaces `adote-hml` e `adote-prd`) |
 
 ## Secret de leitura (uma vez por namespace, fora do Git)
+
+Namespaces que precisam dele: `default` (GeDê), `adote-hml` e `adote-prd`.
 
 Este repositório é público: o Secret nunca entra aqui.
 

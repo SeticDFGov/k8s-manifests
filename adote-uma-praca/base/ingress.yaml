@@ -1,0 +1,22 @@
+# Site e API no mesmo domínio: "/" para o front e "/api" para a API.
+# O host é definido em cada overlay. O certificado fica no proxy reverso da infra
+# (10.230.81.124, Let's Encrypt), que repassa ao Traefik da VM, como no subgd.
+# Sem restrição de entrypoint: vale venha o proxy por HTTP (web) ou HTTPS (websecure).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: adote-uma-praca
+spec:
+  ingressClassName: traefik
+  rules:
+    - host: HOST
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service: { name: adote-api, port: { number: 80 } }
+          - path: /
+            pathType: Prefix
+            backend:
+              service: { name: adote-front, port: { number: 80 } }

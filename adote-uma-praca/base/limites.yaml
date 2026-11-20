@@ -1,0 +1,25 @@
+# Limites do namespace: o Adote divide a VM (4 vCPU, 8 GB) com o GeDê. Um vazamento
+# de memória ou um pico aqui não pode tirar recurso do resto do cluster.
+# Cabe: API e front com uma réplica a mais durante o rolling update, mais o Job de migração.
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: adote-uma-praca
+spec:
+  hard:
+    requests.cpu: 500m
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+    pods: "10"
+---
+# Padrão para contêiner sem "resources" (a quota recusa pod sem requests/limits).
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: adote-uma-praca
+spec:
+  limits:
+    - type: Container
+      defaultRequest: { cpu: 20m, memory: 64Mi }
+      default: { cpu: 200m, memory: 256Mi }
