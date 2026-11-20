@@ -8,7 +8,7 @@ spec:
   source:
     repoURL: https://github.com/SeticDFGov/k8s-manifests.git
     targetRevision: main
-    # Só os arquivos da raiz de sablier/; k3s-traefik/ é aplicado à mão (ver o README de lá)
+    # O plugin do Sablier no Traefik fica em k3s-traefik/ (Application traefik-config)
     path: sablier
   destination:
     server: https://kubernetes.default.svc
