@@ -17,6 +17,9 @@ Versões em 2026-11-18: k3s v1.33.5, Traefik 3.3.6 (`rancher/mirrored-library-tr
 - **Plugin do Sablier** (MeasureSoftGram sob demanda). O Traefik baixa o plugin de
   plugins.traefik.io no boot; erro de download = o pod não chega a plugins.traefik.io / github.com.
 - **Log de acesso em JSON**. Cabeçalhos descartados, exceto `X-Forwarded-For` e `User-Agent`.
+- **`externalTrafficPolicy: Local`** no Service do Traefik: o log mostra o IP de quem conectou
+  na VM (o proxy da infra) em vez de `10.42.0.1`. O IP do usuário final depende de o proxy
+  enviar `X-Forwarded-For`.
 
 ## Ver as requisições
 
